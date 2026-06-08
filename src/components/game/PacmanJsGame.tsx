@@ -105,7 +105,7 @@ export function PacmanJsGame({ onGameOver }: PacmanJsGameProps) {
 
   return (
     <div className="min-h-screen bg-black pt-16 text-white">
-      <SatsManHeader onLogoClick={() => endGame({ score: 0, level: 1 })} />
+      <SatsManHeader />
       <div ref={hostRef} className="satsman-pacman-host">
         <div id="overflow-mask" className="overflow-mask">
           <div id="fps-display" className="fps-display" />
@@ -126,6 +126,9 @@ export function PacmanJsGame({ onGameOver }: PacmanJsGameProps) {
               </button>
               <button type="button" aria-label="Toggle sound" className="satsman-icon-button">
                 <span id="sound-button" className="material-icons satsman-control-icon satsman-volume-on-icon" />
+              </button>
+              <button type="button" aria-label="End game" className="satsman-icon-button" onClick={() => endGame({ score: 0, level: 1 })}>
+                <span className="material-icons satsman-control-icon satsman-stop-icon" />
               </button>
             </span>
           </div>

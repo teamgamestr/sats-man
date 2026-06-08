@@ -257,3 +257,7 @@
 .satsman-pacman-host .satsman-volume-off-icon::before {
   mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M3 9v6h4l5 4V5L7 9zm13.6 3 3.2-3.2-1.4-1.4-3.2 3.2L12 7.4 10.6 8.8l3.2 3.2-3.2 3.2 1.4 1.4 3.2-3.2 3.2 3.2 1.4-1.4z'/%3E%3C/svg%3E");
 }
+
+.satsman-pacman-host .satsman-stop-icon::before {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M6 6h12v12H6z'/%3E%3C/svg%3E");
+}
