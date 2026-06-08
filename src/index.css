@@ -213,6 +213,38 @@
   .pacman-btn-dark-orange {
     @apply border-orange-300 bg-black text-orange-100 hover:border-orange-100 hover:bg-orange-500 hover:text-black focus-visible:bg-orange-500 focus-visible:text-black;
   }
+
+  .pacman-panel {
+    @apply border-4 border-blue-700 bg-black text-white shadow-[0_0_48px_rgba(37,99,235,0.38)];
+  }
+
+  .pacman-panel-title {
+    @apply text-center text-xl font-black uppercase tracking-widest text-yellow-300;
+  }
+
+  .pacman-muted {
+    @apply text-cyan-100/80;
+  }
+
+  .pacman-input {
+    @apply border-2 border-cyan-300 bg-black text-cyan-100 placeholder:text-cyan-100/35 focus-visible:border-yellow-300 focus-visible:ring-4 focus-visible:ring-yellow-300/40;
+  }
+
+  .pacman-soft-card {
+    @apply rounded-lg border-2 border-blue-700 bg-blue-950/35 text-blue-50;
+  }
+
+  .pacman-menu-content {
+    @apply border-4 border-yellow-300 bg-black p-2 text-white shadow-[0_0_36px_rgba(250,204,21,0.28)];
+  }
+
+  .pacman-menu-item {
+    @apply cursor-pointer rounded-md px-2 py-2 font-black uppercase tracking-wide text-cyan-100 outline-none focus:bg-cyan-400 focus:text-black data-[highlighted]:bg-cyan-400 data-[highlighted]:text-black;
+  }
+
+  .pacman-menu-danger {
+    @apply text-orange-200 focus:bg-orange-500 focus:text-black data-[highlighted]:bg-orange-500 data-[highlighted]:text-black;
+  }
 }
 
 .satsman-pacman-host .overflow-mask {

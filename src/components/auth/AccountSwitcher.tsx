@@ -30,8 +30,8 @@ export function AccountSwitcher({ onAddAccountClick }: AccountSwitcherProps) {
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
-        <button className='flex items-center gap-2 h-10 p-1 pr-2.5 rounded-full hover:bg-accent transition-all text-foreground'>
-          <Avatar className='w-8 h-8'>
+        <button className='flex h-11 items-center gap-2 rounded-full border-2 border-yellow-300 bg-black p-1 pr-3 text-yellow-100 transition-all hover:bg-yellow-300 hover:text-black focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-300/60'>
+          <Avatar className='h-8 w-8 border border-yellow-300'>
             <AvatarImage
               src={currentUser.metadata.picture}
               alt={isCurrentUserPending ? '' : getDisplayName(currentUser)}
@@ -44,18 +44,18 @@ export function AccountSwitcher({ onAddAccountClick }: AccountSwitcherProps) {
               )}
             </AvatarFallback>
           </Avatar>
-          <ChevronDown className='w-4 h-4 text-muted-foreground' />
+          <ChevronDown className='h-4 w-4' />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className='w-56 p-2 animate-scale-in'>
-        <div className='font-medium text-sm px-2 py-1.5'>Switch Account</div>
+      <DropdownMenuContent className='pacman-menu-content w-64 animate-scale-in'>
+        <div className='px-2 py-1.5 text-sm font-black uppercase tracking-widest text-yellow-300'>Switch Account</div>
         {otherUsers.map((user) => {
           const isPending = isLoading && !user.metadata.name;
           return (
             <DropdownMenuItem
               key={user.id}
               onClick={() => setLogin(user.id)}
-              className='flex items-center gap-2 cursor-pointer p-2 rounded-md'
+              className='pacman-menu-item flex items-center gap-2'
             >
               <Avatar className='w-8 h-8'>
                 <AvatarImage
@@ -74,7 +74,7 @@ export function AccountSwitcher({ onAddAccountClick }: AccountSwitcherProps) {
                 {isPending ? (
                   <Skeleton className='h-4 w-24' />
                 ) : (
-                  <p className='text-sm font-medium'>{getDisplayName(user)}</p>
+                  <p className='text-sm font-black'>{getDisplayName(user)}</p>
                 )}
               </div>
               {user.id === currentUser.id && <div className='w-2 h-2 rounded-full bg-primary'></div>}
@@ -84,14 +84,14 @@ export function AccountSwitcher({ onAddAccountClick }: AccountSwitcherProps) {
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={onAddAccountClick}
-          className='flex items-center gap-2 cursor-pointer p-2 rounded-md'
+              className='pacman-menu-item flex items-center gap-2'
         >
           <UserPlus className='w-4 h-4' />
           <span>Add another account</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => removeLogin(currentUser.id)}
-          className='flex items-center gap-2 cursor-pointer p-2 rounded-md text-red-500'
+          className='pacman-menu-item pacman-menu-danger flex items-center gap-2'
         >
           <LogOut className='w-4 h-4' />
           <span>Log out</span>

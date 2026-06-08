@@ -454,9 +454,9 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] sm:max-w-sm max-h-[90dvh] p-0 gap-0 overflow-hidden rounded-2xl overflow-y-auto">
+      <DialogContent className="pacman-panel max-h-[90dvh] max-w-[95vw] gap-0 overflow-hidden overflow-y-auto rounded-2xl p-0 sm:max-w-sm">
         <DialogHeader className="px-6 pt-6">
-          <DialogTitle className="text-lg font-semibold leading-none tracking-tight text-center">
+          <DialogTitle className="pacman-panel-title leading-none">
             {getTitle()}
           </DialogTitle>
         </DialogHeader>
@@ -465,22 +465,22 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
           {/* Welcome step — the unified entry point. */}
           {step === 'welcome' && (
             <div className="space-y-5 text-center">
-              <div className="flex size-32 text-6xl bg-primary/10 rounded-full items-center justify-center mx-auto">
+              <div className="mx-auto flex size-32 items-center justify-center rounded-full border-4 border-yellow-300 bg-yellow-300/15 text-6xl">
                 🔑
               </div>
 
-              <p className="text-sm text-muted-foreground">
+              <p className="pacman-muted text-sm">
                 Join with a new Nostr account, or log in with one you already have.
               </p>
 
               <div className="space-y-2">
-                <Button onClick={() => setStep('generate')} className="w-full h-12">
+                <Button onClick={() => setStep('generate')} className="pacman-btn pacman-btn-pink h-12 w-full">
                   Create a new Nostr account
                 </Button>
                 <Button
                   variant="outline"
                   onClick={() => setStep('login')}
-                  className="w-full h-12"
+                  className="pacman-btn pacman-btn-cyan h-12 w-full"
                 >
                   Log in to an existing account
                 </Button>
@@ -494,11 +494,11 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
               <div className="relative w-20 h-20 mx-auto">
                 {isGenerating ? (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <Loader2 className="w-12 h-12 text-primary animate-spin" />
+                    <Loader2 className="h-12 w-12 animate-spin text-yellow-300" />
                   </div>
                 ) : (
-                  <div className="absolute inset-0 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Key className="w-8 h-8 text-primary" />
+                  <div className="absolute inset-0 flex items-center justify-center rounded-full border-4 border-yellow-300 bg-yellow-300/15">
+                    <Key className="h-8 w-8 text-yellow-300" />
                   </div>
                 )}
               </div>
@@ -507,7 +507,7 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
                 <p className="font-medium">
                   {isGenerating ? 'Creating your key…' : 'Your key is your identity'}
                 </p>
-                <p className="text-sm text-muted-foreground">
+                <p className="pacman-muted text-sm">
                   {isGenerating
                     ? 'This only takes a moment.'
                     : "We'll generate a secret key just for you. Keep it safe — it's the only way to log in."}
@@ -515,14 +515,14 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
               </div>
 
               {!isGenerating && (
-                <Button onClick={generateKey} className="w-full h-12">
+                <Button onClick={generateKey} className="pacman-btn pacman-btn-yellow h-12 w-full">
                   Generate key
                 </Button>
               )}
 
               <button
                 onClick={() => setStep('welcome')}
-                className="text-sm text-muted-foreground hover:text-foreground"
+                className="text-sm font-black uppercase text-cyan-200 hover:text-yellow-300"
               >
                 Back
               </button>
@@ -532,11 +532,11 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
           {/* Secure step — show + download nsec. */}
           {step === 'secure' && (
             <div className="space-y-4">
-              <div className="flex size-14 bg-primary/10 rounded-full items-center justify-center mx-auto">
-                <Key className="w-7 h-7 text-primary" />
+              <div className="mx-auto flex size-14 items-center justify-center rounded-full border-2 border-yellow-300 bg-yellow-300/15">
+                <Key className="h-7 w-7 text-yellow-300" />
               </div>
 
-              <p className="text-sm text-muted-foreground text-center">
+              <p className="pacman-muted text-center text-sm">
                 Store your key somewhere safe. You'll need it to log in again.
               </p>
 
@@ -545,7 +545,7 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
                   type={showKey ? 'text' : 'password'}
                   value={nsec}
                   readOnly
-                  className="pr-10 font-mono"
+                  className="pacman-input pr-10 font-mono"
                 />
                 <Button
                   type="button"
@@ -562,13 +562,13 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
                 </Button>
               </div>
 
-              <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
-                <p className="text-xs text-amber-900 dark:text-amber-300">
+              <div className="rounded-lg border-2 border-orange-300 bg-orange-500/15 p-3">
+                <p className="text-xs text-orange-100">
                   This key is your only way to access your account. If you lose it, you lose the account.
                 </p>
               </div>
 
-              <Button onClick={downloadAndProceed} className="w-full h-12">
+              <Button onClick={downloadAndProceed} className="pacman-btn pacman-btn-yellow h-12 w-full">
                 <Download className="w-4 h-4 mr-2" />
                 Download &amp; continue
               </Button>
@@ -578,13 +578,13 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
           {/* Profile step — optional metadata. */}
           {step === 'profile' && (
             <div className="space-y-4">
-              <p className="text-sm text-muted-foreground text-center">
+              <p className="pacman-muted text-center text-sm">
                 Tell others a bit about yourself (optional).
               </p>
 
               <div className={`space-y-4 ${isPublishing ? 'opacity-50 pointer-events-none' : ''}`}>
                 <div className="space-y-1.5">
-                  <label htmlFor="profile-name" className="text-sm font-medium">
+                    <label htmlFor="profile-name" className="text-sm font-black uppercase text-yellow-200">
                     Display name
                   </label>
                   <Input
@@ -594,11 +594,12 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
                       setProfileData((prev) => ({ ...prev, name: e.target.value }))
                     }
                     placeholder="Your name"
+                    className="pacman-input"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="profile-about" className="text-sm font-medium">
+                    <label htmlFor="profile-about" className="text-sm font-black uppercase text-yellow-200">
                     Bio
                   </label>
                   <Textarea
@@ -608,13 +609,13 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
                       setProfileData((prev) => ({ ...prev, about: e.target.value }))
                     }
                     placeholder="A little about you…"
-                    className="resize-none"
+                    className="pacman-input resize-none"
                     rows={3}
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="profile-picture" className="text-sm font-medium">
+                    <label htmlFor="profile-picture" className="text-sm font-black uppercase text-yellow-200">
                     Avatar
                   </label>
                   <div className="flex gap-2">
@@ -625,7 +626,7 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
                         setProfileData((prev) => ({ ...prev, picture: e.target.value }))
                       }
                       placeholder="https://…"
-                      className="flex-1"
+                      className="pacman-input flex-1"
                     />
                     <input
                       type="file"
@@ -641,6 +642,7 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
                       onClick={() => avatarFileInputRef.current?.click()}
                       disabled={isUploading}
                       title="Upload avatar"
+                      className="pacman-btn pacman-btn-cyan"
                     >
                       {isUploading ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -656,7 +658,7 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
                 <Button
                   onClick={() => finishSignup(false)}
                   disabled={isPublishing}
-                  className="w-full h-12"
+                  className="pacman-btn pacman-btn-yellow h-12 w-full"
                 >
                   {isPublishing ? 'Saving…' : 'Finish'}
                 </Button>
@@ -664,7 +666,7 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
                   variant="ghost"
                   onClick={() => finishSignup(true)}
                   disabled={isPublishing}
-                  className="w-full"
+                  className="w-full font-black uppercase text-cyan-200 hover:text-yellow-300"
                 >
                   Skip for now
                 </Button>
@@ -680,7 +682,7 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
                   <Button
                     onClick={handleExtensionLogin}
                     disabled={isLoggingIn}
-                    className="w-full h-12"
+                    className="pacman-btn pacman-btn-cyan h-12 w-full"
                   >
                     {isLoggingIn ? 'Logging in…' : 'Log in with extension'}
                   </Button>
@@ -688,13 +690,13 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
                   <Button
                     variant="outline"
                     onClick={goToConnect}
-                    className="w-full h-12"
+                    className="pacman-btn pacman-btn-yellow h-12 w-full"
                   >
                     Use remote signer
                   </Button>
 
                   <Collapsible open={showMoreOptions} onOpenChange={setShowMoreOptions}>
-                    <CollapsibleTrigger className="w-full flex items-center justify-center gap-1 text-sm text-muted-foreground hover:text-foreground py-2">
+                  <CollapsibleTrigger className="flex w-full items-center justify-center gap-1 py-2 text-sm font-black uppercase text-cyan-200 hover:text-yellow-300">
                       <span>Use secret key</span>
                       <ChevronDown
                         className={`w-4 h-4 transition-transform ${
@@ -731,7 +733,7 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
                   <Button
                     variant="outline"
                     onClick={goToConnect}
-                    className="w-full"
+                    className="pacman-btn pacman-btn-yellow w-full"
                   >
                     Use remote signer
                   </Button>
@@ -740,7 +742,7 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
 
               <button
                 onClick={() => setStep('welcome')}
-                className="w-full text-sm text-muted-foreground hover:text-foreground"
+                 className="w-full text-sm font-black uppercase text-cyan-200 hover:text-yellow-300"
               >
                 Back
               </button>
@@ -753,8 +755,8 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
               <div className="flex flex-col items-center space-y-4">
                 {connectError ? (
                   <div className="flex flex-col items-center space-y-3 py-4">
-                    <p className="text-sm text-destructive text-center">{connectError}</p>
-                    <Button variant="outline" onClick={handleConnectRetry}>
+                    <p className="text-center text-sm text-orange-200">{connectError}</p>
+                    <Button variant="outline" onClick={handleConnectRetry} className="pacman-btn pacman-btn-orange">
                       Try again
                     </Button>
                   </div>
@@ -764,14 +766,14 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
                   // phase so a stuck signer is visibly stuck, not silently
                   // stuck.
                   <div className="flex flex-col items-center space-y-4 py-6 w-full">
-                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                    <p className="text-sm text-muted-foreground text-center min-h-[1.25rem]">
+                    <Loader2 className="h-8 w-8 animate-spin text-yellow-300" />
+                    <p className="pacman-muted min-h-[1.25rem] text-center text-sm">
                       {connectStatusLabel(connectStatus)}
                     </p>
                     <button
                       type="button"
                       onClick={handleConnectRetry}
-                      className="text-sm text-primary hover:underline underline-offset-4 font-medium"
+                      className="text-sm font-black uppercase text-cyan-200 hover:text-yellow-300"
                     >
                       Cancel
                     </button>
@@ -785,7 +787,7 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
                     )}
 
                     {isMobile && (
-                      <Button onClick={handleOpenSignerApp} className="w-full h-12">
+                      <Button onClick={handleOpenSignerApp} className="pacman-btn pacman-btn-cyan h-12 w-full">
                         <ExternalLink className="w-5 h-5 mr-2" />
                         Open signer app
                       </Button>
@@ -793,14 +795,14 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
                   </>
                 ) : (
                   <div className="flex items-center justify-center h-[100px]">
-                    <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                    <Loader2 className="h-8 w-8 animate-spin text-yellow-300" />
                   </div>
                 )}
               </div>
 
               {/* Manual bunker URI fallback. */}
               <Collapsible open={showBunkerInput} onOpenChange={setShowBunkerInput}>
-                <CollapsibleTrigger className="w-full flex items-center justify-center gap-1 text-sm text-muted-foreground hover:text-foreground py-2">
+                <CollapsibleTrigger className="flex w-full items-center justify-center gap-1 py-2 text-sm font-black uppercase text-cyan-200 hover:text-yellow-300">
                   <span>Enter bunker URI manually</span>
                   {showBunkerInput ? (
                     <ChevronUp className="w-4 h-4" />
@@ -813,7 +815,7 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
                     value={bunkerUri}
                     onChange={(e) => setBunkerUri(e.target.value)}
                     placeholder="bunker://…"
-                    className="text-base md:text-sm"
+                    className="pacman-input text-base md:text-sm"
                   />
                   {bunkerUri && !validateBunkerUri(bunkerUri) && (
                     <Alert variant="destructive">
@@ -826,7 +828,7 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
                     disabled={
                       isLoggingIn || !bunkerUri.trim() || !validateBunkerUri(bunkerUri)
                     }
-                    className="w-full"
+                    className="pacman-btn pacman-btn-cyan w-full"
                   >
                     {isLoggingIn ? 'Connecting…' : 'Connect'}
                   </Button>
@@ -835,7 +837,7 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
 
               <button
                 onClick={() => setStep('login')}
-                className="w-full text-sm text-muted-foreground hover:text-foreground"
+                className="w-full text-sm font-black uppercase text-cyan-200 hover:text-yellow-300"
               >
                 Back
               </button>
