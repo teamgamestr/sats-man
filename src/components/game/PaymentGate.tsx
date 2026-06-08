@@ -1,0 +1,214 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Copy, Loader2, Play, X, Zap } from 'lucide-react';
+import type { Event } from 'nostr-tools';
+import QRCode from 'qrcode';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import AuthDialog from '@/components/auth/AuthDialog';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useLoginActions } from '@/hooks/useLoginActions';
+import { useWallet } from '@/hooks/useWallet';
+import { useZaps } from '@/hooks/useZaps';
+import { gameConfig } from '@/config/gameConfig';
+import { unlockPacmanAudio } from '@/lib/pacmanAudio';
+
+export interface PaymentSession {
+  sessionId: string;
+  paid: boolean;
+  bolt11?: string;
+  receiptId?: string;
+}
+
+interface PaymentGateProps {
+  onStart: (session: PaymentSession) => void;
+}
+
+export function PaymentGate({ onStart }: PaymentGateProps) {
+  const { user } = useCurrentUser();
+  const login = useLoginActions();
+  const { webln, activeNWC } = useWallet();
+  const [trackedInvoice, setTrackedInvoice] = useState<string | null>(null);
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState('');
+  const [status, setStatus] = useState<string | null>(null);
+  const [isAwaitingReceipt, setIsAwaitingReceipt] = useState(false);
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const [authInitialStep, setAuthInitialStep] = useState<'login' | 'generate'>('login');
+  const [pendingAuthStart, setPendingAuthStart] = useState(false);
+  const sessionIdRef = useRef<string | null>(null);
+
+  const getSessionId = useCallback(() => {
+    sessionIdRef.current ??= `sats-man-${globalThis.crypto.randomUUID()}`;
+    return sessionIdRef.current;
+  }, []);
+
+  const target = useMemo<Event>(() => ({
+    id: 'sats-man-payment',
+    pubkey: gameConfig.receiverPubkey,
+    created_at: 0,
+    kind: 0,
+    tags: [],
+    content: '',
+    sig: '',
+  }), []);
+
+  const skipAutomaticPayment = !webln && !activeNWC;
+  const { zap, isZapping, invoice, resetInvoice, zaps, refetch } = useZaps(target, webln, activeNWC, skipAutomaticPayment);
+
+  useEffect(() => {
+    if (!invoice) return;
+    QRCode.toDataURL(invoice.toUpperCase(), { width: 280, margin: 2 })
+      .then(setQrCodeDataUrl)
+      .catch(() => setQrCodeDataUrl(''));
+  }, [invoice]);
+
+  useEffect(() => {
+    if (!trackedInvoice) return;
+    const normalized = trackedInvoice.toLowerCase();
+    const payerKey = user?.pubkey;
+    const receipt = zaps.find((event) => {
+      const bolt11 = event.tags.find(([name]) => name === 'bolt11')?.[1]?.toLowerCase();
+      if (bolt11 !== normalized) return false;
+      const payer = event.tags.find(([name]) => name === 'P')?.[1];
+      return !payerKey || !payer || payer === payerKey;
+    });
+    if (receipt) {
+      onStart({ sessionId: getSessionId(), paid: true, bolt11: trackedInvoice, receiptId: receipt.id });
+    }
+  }, [getSessionId, onStart, trackedInvoice, user?.pubkey, zaps]);
+
+  useEffect(() => {
+    if (!isAwaitingReceipt) return;
+    const interval = window.setInterval(() => void refetch(), 5000);
+    return () => window.clearInterval(interval);
+  }, [isAwaitingReceipt, refetch]);
+
+  const handleAnonymous = useCallback(() => {
+    unlockPacmanAudio();
+    login.anonymous(undefined, { source: 'anonymous' });
+    sessionStorage.setItem('satsman_session_origin', window.location.pathname === '/conference' ? '/conference' : '/');
+    onStart({ sessionId: getSessionId(), paid: false });
+  }, [getSessionId, login, onStart]);
+
+  const openAuth = useCallback((step: 'login' | 'generate') => {
+    unlockPacmanAudio();
+    setAuthInitialStep(step);
+    setPendingAuthStart(true);
+    setAuthDialogOpen(true);
+  }, []);
+
+  useEffect(() => {
+    if (!pendingAuthStart || !user || authDialogOpen) return undefined;
+
+    const timer = window.setTimeout(() => {
+      setPendingAuthStart(false);
+      onStart({ sessionId: getSessionId(), paid: false });
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [authDialogOpen, getSessionId, onStart, pendingAuthStart, user]);
+
+  const handleFreePlay = useCallback(() => {
+    unlockPacmanAudio();
+    if (!user) {
+      const pubkey = login.anonymous(undefined, { source: 'anonymous' });
+      sessionStorage.setItem(`satsman:alias:${pubkey}`, JSON.stringify({ loginSource: 'anonymous' }));
+    }
+    onStart({ sessionId: getSessionId(), paid: false });
+  }, [getSessionId, login, onStart, user]);
+
+  const handleZap = useCallback(async () => {
+    if (!user) return;
+    unlockPacmanAudio();
+    setStatus(null);
+    const sessionId = getSessionId();
+    const result = await zap(gameConfig.costToPlay, `${gameConfig.zapMemo} | session:${sessionId}`);
+    if (!result?.invoice) {
+      setStatus('Could not create invoice. Try again.');
+      return;
+    }
+    setTrackedInvoice(result.invoice);
+    setIsAwaitingReceipt(true);
+    setStatus(result.autoPaid ? 'Payment sent. Waiting for zap receipt...' : 'Invoice ready. Waiting for zap receipt...');
+    void refetch();
+  }, [getSessionId, refetch, user, zap]);
+
+  if (invoice) {
+    return (
+      <Card className="mx-auto max-w-md border-yellow-400 bg-black text-white">
+        <CardHeader className="text-center">
+          <div className="flex items-center justify-between gap-2">
+            <CardTitle className="flex-1 text-yellow-300">Pay To Play</CardTitle>
+            <Button size="icon" variant="ghost" onClick={() => { resetInvoice(); setTrackedInvoice(null); setIsAwaitingReceipt(false); }}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <CardDescription>{gameConfig.costToPlay} sats to start this game</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="rounded-lg bg-white p-4">{qrCodeDataUrl ? <img src={qrCodeDataUrl} alt="Lightning invoice QR" className="mx-auto" /> : null}</div>
+          <Button className="w-full" variant="outline" onClick={() => void navigator.clipboard.writeText(invoice)}>
+            <Copy className="mr-2 h-4 w-4" /> Copy Invoice
+          </Button>
+          <div className="flex items-center justify-center gap-2 rounded border border-blue-400/60 bg-blue-950/40 p-3 text-sm text-blue-100">
+            <Loader2 className="h-4 w-4 animate-spin" /> Waiting for zap receipt
+          </div>
+          {status && <p className="text-center text-sm text-zinc-300">{status}</p>}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="relative mx-auto max-w-xl overflow-hidden border-4 border-blue-700 bg-black text-white shadow-[0_0_80px_rgba(37,99,235,0.35)]">
+      <CardHeader className="relative text-center">
+        <img
+          src="/sats-man-logo.png"
+          alt="Sats-Man logo"
+          className="mx-auto mb-3 h-40 w-auto object-contain drop-shadow-[0_0_32px_rgba(250,204,21,0.65)] sm:h-48"
+        />
+        <CardTitle className="sr-only">Sats-Man</CardTitle>
+      </CardHeader>
+      <CardContent className="relative space-y-5">
+        {!user ? (
+          <div className="space-y-4 text-center">
+            <div className="grid gap-3 sm:grid-cols-3">
+              <Button className="h-16 border-2 border-cyan-300 bg-cyan-500 text-lg font-black uppercase text-black hover:bg-cyan-300" onClick={() => openAuth('login')}>
+                Login
+              </Button>
+              <Button className="h-16 border-2 border-pink-300 bg-pink-500 text-lg font-black uppercase text-black hover:bg-pink-300" onClick={() => openAuth('generate')}>
+                Sign Up
+              </Button>
+              <Button className="h-16 border-2 border-orange-300 bg-orange-500 text-lg font-black uppercase text-black hover:bg-orange-300" onClick={handleAnonymous}>
+                <Play className="mr-2 h-5 w-5" /> Anon
+              </Button>
+            </div>
+            {gameConfig.freePlayEnabled && (
+              <Button className="w-full bg-yellow-300 py-6 text-lg font-black uppercase text-black hover:bg-yellow-200" onClick={handleFreePlay}>
+                Quick Free Play
+              </Button>
+            )}
+            <AuthDialog
+              key={authInitialStep}
+              isOpen={authDialogOpen}
+              initialStep={authInitialStep}
+              onClose={() => setAuthDialogOpen(false)}
+            />
+          </div>
+        ) : (
+          <div className="space-y-4 text-center">
+            <Button className="w-full bg-orange-500 py-6 text-lg font-black uppercase text-black hover:bg-orange-300" onClick={handleZap} disabled={isZapping || isAwaitingReceipt}>
+              {isZapping || isAwaitingReceipt ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Zap className="mr-2 h-4 w-4" />}
+              {skipAutomaticPayment ? `Get Invoice (${gameConfig.costToPlay} sats)` : `Zap ${gameConfig.costToPlay} sats`}
+            </Button>
+            {gameConfig.freePlayEnabled && (
+              <Button className="w-full border-2 border-yellow-300 bg-yellow-300 py-6 text-lg font-black uppercase text-black hover:bg-yellow-200" variant="outline" onClick={handleFreePlay}>
+                Play Free
+              </Button>
+            )}
+            {status && <p className="text-center text-sm text-zinc-300">{status}</p>}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}

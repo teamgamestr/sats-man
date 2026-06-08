@@ -1,0 +1,21 @@
+export interface GameConfig {
+  gameId: string;
+  gameName: string;
+  gameVersion: string;
+  receiverPubkey: string;
+  costToPlay: number;
+  zapMemo: string;
+  freePlayEnabled: boolean;
+  scoreUrlBase: string;
+}
+
+export const gameConfig: GameConfig = {
+  gameId: 'sats-man',
+  gameName: 'Sats-Man',
+  gameVersion: '0.1.0',
+  receiverPubkey: '5a625acc4312b5b56c735e7eb0fa48521ec9a5fe72bef0015b0ca62f3c4e09b6',
+  costToPlay: 210,
+  zapMemo: 'Playing Sats-Man on Gamestr',
+  freePlayEnabled: true,
+  scoreUrlBase: 'https://gamestr.io/sats-man/score/',
+};
