@@ -89,7 +89,7 @@ export function PacmanJsGame({ onGameOver }: PacmanJsGameProps) {
 
   return (
     <div className="min-h-screen bg-black pt-16 text-white">
-      <SatsManHeader />
+      <SatsManHeader onLogoClick={() => onGameOver({ score: 0, level: 1 })} />
       <div ref={hostRef} className="satsman-pacman-host">
         <div id="overflow-mask" className="overflow-mask">
           <div id="fps-display" className="fps-display" />
