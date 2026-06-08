@@ -8,6 +8,7 @@ import { PAYMENT_RELAYS } from '@/lib/paymentRelays';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useNWC } from '@/hooks/useNWCContext';
 import type { NWCConnection } from '@/hooks/useNWC';
+import { gameConfig } from '@/config/gameConfig';
 
 interface WebLNProvider {
   sendPayment(invoice: string): Promise<unknown>;
@@ -70,12 +71,18 @@ export function useZaps(
         [{ kinds: [0], authors: [target.pubkey], limit: 1 }],
         { signal: AbortSignal.timeout(8000) },
       );
-      if (!recipientProfile) {
-        throw new Error('Zap recipient profile not found on configured relays. Publish the payment account profile to relay.gamestr.io with a Lightning address.');
-      }
-
-      const zapEndpoint = await nip57.getZapEndpoint(recipientProfile as Event);
-      if (!zapEndpoint) throw new Error('Payment recipient profile has no Lightning zap endpoint. Add lud16 or lud06 to the profile.');
+      const fallbackProfile: Event = {
+        id: 'sats-man-fallback-payment-profile',
+        pubkey: target.pubkey,
+        created_at: 0,
+        kind: 0,
+        tags: [],
+        content: JSON.stringify({ lud16: gameConfig.fallbackLightningAddress }),
+        sig: '',
+      };
+      const zapEndpoint = await nip57.getZapEndpoint((recipientProfile as Event | undefined) ?? fallbackProfile)
+        ?? await nip57.getZapEndpoint(fallbackProfile);
+      if (!zapEndpoint) throw new Error(`Could not load zap endpoint for ${gameConfig.fallbackLightningAddress}.`);
 
       const zapRequest = nip57.makeZapRequest({
         pubkey: target.pubkey,
