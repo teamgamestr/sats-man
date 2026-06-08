@@ -1,10 +1,12 @@
 import { useCallback, useState } from 'react';
+import { ExternalLink, LogOut, Play, Share2, Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PaymentGate, type PaymentSession } from '@/components/game/PaymentGate';
 import { PacmanJsGame } from '@/components/game/PacmanJsGame';
 import { SatsManHeader } from '@/components/game/SatsManHeader';
 import { useScorePublishing } from '@/hooks/useScorePublishing';
+import { useLoginActions } from '@/hooks/useLoginActions';
 import { gameConfig } from '@/config/gameConfig';
 
 interface GameResult {
@@ -19,7 +21,10 @@ export function SatsManGame() {
   const [result, setResult] = useState<GameResult | null>(null);
   const [scoreEventId, setScoreEventId] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
+  const [shareComplete, setShareComplete] = useState(false);
   const { publishScore, publishSharePost, canSharePost } = useScorePublishing();
+  const login = useLoginActions();
+  const isConferenceMode = typeof window !== 'undefined' && sessionStorage.getItem('satsman_session_origin') === '/conference';
 
   const handleStart = useCallback((nextSession: PaymentSession) => {
     setSession(nextSession);
@@ -27,7 +32,36 @@ export function SatsManGame() {
     setResult(null);
     setScoreEventId(null);
     setStatus(null);
+    setShareComplete(false);
   }, []);
+
+  const handleLogout = useCallback(() => {
+    const sessionOrigin = sessionStorage.getItem('satsman_session_origin') || '/';
+    void login.logout();
+    setSession(null);
+    setResult(null);
+    setScoreEventId(null);
+    setStatus(null);
+    setShareComplete(false);
+
+    if (window.location.pathname !== sessionOrigin) {
+      window.location.href = sessionOrigin;
+    }
+  }, [login]);
+
+  const handlePlayAgain = useCallback(() => {
+    setSession(null);
+    setResult(null);
+    setScoreEventId(null);
+    setStatus(null);
+    setShareComplete(false);
+  }, []);
+
+  const handleShareScore = useCallback(async () => {
+    if (!scoreEventId || !result) return;
+    await publishSharePost(result.score, scoreEventId);
+    setShareComplete(true);
+  }, [publishSharePost, result, scoreEventId]);
 
   const handleGameOver = useCallback(async (snapshot: { score: number; level: number }) => {
     const duration = Math.max(1, Math.floor((Date.now() - startedAt) / 1000));
@@ -63,22 +97,58 @@ export function SatsManGame() {
   if (result) {
     const scoreUrl = scoreEventId ? `${gameConfig.scoreUrlBase}${scoreEventId}` : null;
     return (
-      <div className="flex min-h-screen items-center justify-center bg-black p-4 pt-24 text-white">
+      <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,#172554_0%,#030712_42%,#000_100%)] p-4 pt-24 text-white">
         <SatsManHeader />
-        <Card className="w-full max-w-md border-yellow-400 bg-zinc-950 text-white">
+        <Card className="w-full max-w-lg border-4 border-yellow-300 bg-black/95 text-white shadow-[0_0_70px_rgba(250,204,21,0.24)]">
           <CardHeader className="text-center">
-            <CardTitle className="text-3xl text-yellow-300">Game Over</CardTitle>
+            <img src="/sats-man-logo.png" alt="Sats-Man" className="mx-auto h-24 w-auto object-contain drop-shadow-[0_0_24px_rgba(250,204,21,0.55)]" />
+            <CardTitle className="mt-2 flex items-center justify-center gap-2 text-3xl font-black uppercase tracking-widest text-yellow-300">
+              <Trophy className="h-7 w-7" /> Game Over
+            </CardTitle>
+            <p className="text-sm text-cyan-100/80">
+              {isConferenceMode ? 'Play again as this player, or log out for the next player.' : 'Final results for this session'}
+            </p>
           </CardHeader>
-          <CardContent className="space-y-4 text-center">
-            <div className="text-5xl font-black text-white">{result.score}</div>
-            <p className="text-sm text-zinc-400">Level {result.level} in {result.duration}s</p>
-            {status && <p className="text-sm text-zinc-300">{status}</p>}
-            {scoreUrl && <a className="block text-sm text-yellow-300 underline" href={scoreUrl} target="_blank" rel="noreferrer">View on Gamestr</a>}
-            <div className="grid gap-2">
-              {scoreEventId && canSharePost && (
-                <Button onClick={() => void publishSharePost(result.score, scoreEventId)}>Share Score</Button>
+          <CardContent className="space-y-5 text-center">
+            <div className="grid grid-cols-3 gap-3 rounded-xl border-2 border-blue-700 bg-blue-950/35 p-4">
+              <div>
+                <div className="text-xs font-black uppercase tracking-widest text-cyan-300">Score</div>
+                <div className="text-3xl font-black text-white">{result.score.toLocaleString()}</div>
+              </div>
+              <div>
+                <div className="text-xs font-black uppercase tracking-widest text-pink-300">Level</div>
+                <div className="text-3xl font-black text-white">{result.level}</div>
+              </div>
+              <div>
+                <div className="text-xs font-black uppercase tracking-widest text-orange-300">Time</div>
+                <div className="text-3xl font-black text-white">{result.duration}s</div>
+              </div>
+            </div>
+
+            {status && (
+              <p className="rounded border border-yellow-300/40 bg-yellow-300/10 p-3 text-sm text-yellow-100">{status}</p>
+            )}
+
+            <div className="grid gap-3">
+              {scoreUrl && (
+                <Button className="h-12 border-2 border-cyan-100 bg-cyan-400 font-black uppercase text-black hover:bg-cyan-300" onClick={() => window.open(scoreUrl, '_blank', 'noopener,noreferrer')}>
+                  <ExternalLink className="mr-2 h-4 w-4" /> View Score On Gamestr
+                </Button>
               )}
-              <Button variant="outline" onClick={() => setSession(null)}>Play Again</Button>
+              {scoreEventId && canSharePost && !shareComplete && (
+                <Button className="h-12 border-2 border-pink-100 bg-pink-500 font-black uppercase text-black hover:bg-pink-300" onClick={() => void handleShareScore()}>
+                  <Share2 className="mr-2 h-4 w-4" /> Share Score On Nostr
+                </Button>
+              )}
+              {shareComplete && (
+                <div className="rounded border border-pink-300/60 bg-pink-500/15 p-3 text-sm font-black uppercase text-pink-100">Shared on Nostr</div>
+              )}
+              <Button className="h-12 border-2 border-yellow-100 bg-yellow-300 font-black uppercase text-black hover:bg-yellow-200" onClick={handlePlayAgain}>
+                <Play className="mr-2 h-4 w-4" /> Play Again
+              </Button>
+              <Button className="h-12 border-2 border-zinc-500 bg-zinc-950 font-black uppercase text-zinc-100 hover:bg-zinc-900" variant="outline" onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" /> {isConferenceMode ? 'Log Out For Next Player' : 'Logout'}
+              </Button>
             </div>
           </CardContent>
         </Card>
