@@ -131,22 +131,22 @@ export function SatsManGame() {
 
             <div className="grid gap-3">
               {scoreUrl && (
-                <Button className="h-12 border-2 border-cyan-100 bg-cyan-400 font-black uppercase text-black hover:bg-cyan-300" onClick={() => window.open(scoreUrl, '_blank', 'noopener,noreferrer')}>
+                <Button className="pacman-btn pacman-btn-cyan h-12" onClick={() => window.open(scoreUrl, '_blank', 'noopener,noreferrer')}>
                   <ExternalLink className="mr-2 h-4 w-4" /> View Score On Gamestr
                 </Button>
               )}
               {canSharePost && !shareComplete && (
-                <Button className="h-12 border-2 border-pink-100 bg-pink-500 font-black uppercase text-black hover:bg-pink-300" onClick={() => void handleShareScore()}>
+                <Button className="pacman-btn pacman-btn-pink h-12" onClick={() => void handleShareScore()}>
                   <Share2 className="mr-2 h-4 w-4" /> Share Score On Nostr
                 </Button>
               )}
               {shareComplete && (
                 <div className="rounded border border-pink-300/60 bg-pink-500/15 p-3 text-sm font-black uppercase text-pink-100">Shared on Nostr</div>
               )}
-              <Button className="h-12 border-2 border-yellow-100 bg-yellow-300 font-black uppercase text-black hover:bg-yellow-200" onClick={handlePlayAgain}>
+              <Button className="pacman-btn pacman-btn-yellow h-12" onClick={handlePlayAgain}>
                 <Play className="mr-2 h-4 w-4" /> Play Again
               </Button>
-              <Button className="h-12 border-2 border-orange-300 bg-black font-black uppercase text-orange-100 hover:border-orange-100 hover:bg-orange-500 hover:text-black focus-visible:border-orange-100 focus-visible:bg-orange-500 focus-visible:text-black" variant="outline" onClick={handleLogout}>
+              <Button className="pacman-btn pacman-btn-dark-orange h-12" variant="outline" onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" /> {isConferenceMode ? 'Log Out For Next Player' : 'Logout'}
               </Button>
             </div>

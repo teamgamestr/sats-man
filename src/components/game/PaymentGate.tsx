@@ -176,18 +176,18 @@ export function PaymentGate({ onStart }: PaymentGateProps) {
         {!user ? (
           <div className="space-y-4 text-center">
             <div className="grid gap-3 sm:grid-cols-3">
-              <Button className="h-16 border-2 border-cyan-300 bg-cyan-500 text-lg font-black uppercase text-black hover:bg-cyan-300" onClick={() => openAuth('login')}>
+              <Button className="pacman-btn pacman-btn-cyan h-16 text-lg" onClick={() => openAuth('login')}>
                 Login
               </Button>
-              <Button className="h-16 border-2 border-pink-300 bg-pink-500 text-lg font-black uppercase text-black hover:bg-pink-300" onClick={() => openAuth('generate')}>
+              <Button className="pacman-btn pacman-btn-pink h-16 text-lg" onClick={() => openAuth('generate')}>
                 Sign Up
               </Button>
-              <Button className="h-16 border-2 border-orange-300 bg-orange-500 text-lg font-black uppercase text-black hover:bg-orange-300" onClick={handleAnonymous}>
+              <Button className="pacman-btn pacman-btn-orange h-16 text-lg" onClick={handleAnonymous}>
                 <Play className="mr-2 h-5 w-5" /> Anon
               </Button>
             </div>
             {gameConfig.freePlayEnabled && (
-              <Button className="w-full bg-yellow-300 py-6 text-lg font-black uppercase text-black hover:bg-yellow-200" onClick={handleFreePlay}>
+              <Button className="pacman-btn pacman-btn-yellow w-full py-6 text-lg" onClick={handleFreePlay}>
                 Quick Free Play
               </Button>
             )}
@@ -200,12 +200,12 @@ export function PaymentGate({ onStart }: PaymentGateProps) {
           </div>
         ) : (
           <div className="space-y-4 text-center">
-            <Button className="w-full bg-orange-500 py-6 text-lg font-black uppercase text-black hover:bg-orange-300" onClick={handleZap} disabled={isZapping || isAwaitingReceipt}>
+            <Button className="pacman-btn pacman-btn-orange w-full py-6 text-lg" onClick={handleZap} disabled={isZapping || isAwaitingReceipt}>
               {isZapping || isAwaitingReceipt ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Zap className="mr-2 h-4 w-4" />}
               {skipAutomaticPayment ? `Get Invoice (${gameConfig.costToPlay} sats)` : `Zap ${gameConfig.costToPlay} sats`}
             </Button>
             {gameConfig.freePlayEnabled && (
-              <Button className="w-full border-2 border-yellow-300 bg-yellow-300 py-6 text-lg font-black uppercase text-black hover:bg-yellow-200" variant="outline" onClick={handleFreePlay}>
+              <Button className="pacman-btn pacman-btn-yellow w-full py-6 text-lg" variant="outline" onClick={handleFreePlay}>
                 Play Free
               </Button>
             )}

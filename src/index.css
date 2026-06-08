@@ -189,6 +189,32 @@
   }
 }
 
+@layer components {
+  .pacman-btn {
+    @apply border-2 font-black uppercase text-black transition-all hover:-translate-y-0.5 hover:shadow-[0_0_24px_rgba(255,255,255,0.24)] focus-visible:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/70 disabled:translate-y-0 disabled:opacity-60;
+  }
+
+  .pacman-btn-yellow {
+    @apply border-yellow-100 bg-yellow-300 hover:border-yellow-50 hover:bg-yellow-200 focus-visible:bg-yellow-200;
+  }
+
+  .pacman-btn-cyan {
+    @apply border-cyan-100 bg-cyan-400 hover:border-cyan-50 hover:bg-cyan-300 focus-visible:bg-cyan-300;
+  }
+
+  .pacman-btn-pink {
+    @apply border-pink-100 bg-pink-500 hover:border-pink-50 hover:bg-pink-300 focus-visible:bg-pink-300;
+  }
+
+  .pacman-btn-orange {
+    @apply border-orange-100 bg-orange-500 hover:border-orange-50 hover:bg-orange-300 focus-visible:bg-orange-300;
+  }
+
+  .pacman-btn-dark-orange {
+    @apply border-orange-300 bg-black text-orange-100 hover:border-orange-100 hover:bg-orange-500 hover:text-black focus-visible:bg-orange-500 focus-visible:text-black;
+  }
+}
+
 .satsman-pacman-host .overflow-mask {
   height: calc(100vh - 4rem);
 }

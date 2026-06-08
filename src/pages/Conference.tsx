@@ -78,7 +78,7 @@ export default function Conference() {
             <QrCode className="mx-auto h-10 w-10 text-yellow-300" />
             <h2 className="text-xl font-black uppercase tracking-widest text-yellow-300">QR Code Login</h2>
             <p className="text-sm text-yellow-50/80">Scan with your mobile Nostr signer app. Your private keys stay on your device.</p>
-            <Button className="h-14 w-full border-2 border-yellow-100 bg-yellow-300 text-lg font-black uppercase text-black hover:bg-yellow-200" onClick={startQrLogin}>Show QR Code</Button>
+            <Button className="pacman-btn pacman-btn-yellow h-14 w-full text-lg" onClick={startQrLogin}>Show QR Code</Button>
           </CardContent>
         </Card>
 
@@ -88,7 +88,7 @@ export default function Conference() {
             <h2 className="text-xl font-black uppercase tracking-widest text-cyan-300">NIP-05 Login</h2>
             <p className="text-sm text-cyan-50/80">Enter your Nostr address to link scores to your identity without needing to sign.</p>
             <Input value={nip05} onChange={(event) => setNip05(event.target.value)} placeholder="name@example.com" className="h-12 border-2 border-cyan-300 bg-black text-center text-cyan-100 placeholder:text-cyan-100/35" />
-            <Button className="h-14 w-full border-2 border-cyan-100 bg-cyan-400 text-lg font-black uppercase text-black hover:bg-cyan-300" onClick={handleNip05Login}>Login With NIP-05</Button>
+            <Button className="pacman-btn pacman-btn-cyan h-14 w-full text-lg" onClick={handleNip05Login}>Login With NIP-05</Button>
           </CardContent>
         </Card>
 
@@ -97,7 +97,7 @@ export default function Conference() {
             <UserX className="mx-auto h-10 w-10 text-orange-300" />
             <h2 className="text-xl font-black uppercase tracking-widest text-orange-300">Anonymous Play</h2>
             <p className="text-sm text-orange-50/80">Play with a temporary Nostr identity. Scores can publish, but are tied to this ephemeral player.</p>
-            <Button className="h-14 w-full border-2 border-orange-100 bg-orange-500 text-lg font-black uppercase text-black hover:bg-orange-300" onClick={handleAnonymous}>Continue Without Login</Button>
+            <Button className="pacman-btn pacman-btn-orange h-14 w-full text-lg" onClick={handleAnonymous}>Continue Without Login</Button>
           </CardContent>
         </Card>
 
