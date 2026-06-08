@@ -1151,15 +1151,27 @@ class GameCoordinator {
       this.mazeArray[rowIndex] = row[0].split('');
     });
 
-    this.gameStartButton.addEventListener(
-      'click',
-      this.startButtonClick.bind(this),
-    );
-    this.pauseButton.addEventListener('click', this.handlePauseKey.bind(this));
-    this.soundButton.addEventListener(
-      'click',
-      this.soundButtonClick.bind(this),
-    );
+    this.destroyed = false;
+    this.boundStartButtonClick = this.startButtonClick.bind(this);
+    this.boundPauseKey = this.handlePauseKey.bind(this);
+    this.boundSoundButtonClick = this.soundButtonClick.bind(this);
+    this.boundKeyDown = this.handleKeyDown.bind(this);
+    this.boundSwipe = this.handleSwipe.bind(this);
+    this.boundAwardPoints = this.awardPoints.bind(this);
+    this.boundDeathSequence = this.deathSequence.bind(this);
+    this.boundDotEaten = this.dotEaten.bind(this);
+    this.boundPowerUp = this.powerUp.bind(this);
+    this.boundEatGhost = this.eatGhost.bind(this);
+    this.boundRestoreGhost = this.restoreGhost.bind(this);
+    this.boundAddTimer = this.addTimer.bind(this);
+    this.boundRemoveTimer = this.removeTimer.bind(this);
+    this.boundReleaseGhost = this.releaseGhost.bind(this);
+    this.boundTouchStart = this.handleTouchStart.bind(this);
+    this.boundTouchEnd = this.handleTouchEnd.bind(this);
+
+    this.gameStartButton.addEventListener('click', this.boundStartButtonClick);
+    this.pauseButton.addEventListener('click', this.boundPauseKey);
+    this.soundButton.addEventListener('click', this.boundSoundButtonClick);
 
     this.preloadAssets();
   }
@@ -1199,6 +1211,7 @@ class GameCoordinator {
    * Reveals the game underneath the loading covers and starts gameplay
    */
   startButtonClick() {
+    if (this.destroyed) return;
     this.leftCover.style.left = '-50%';
     this.rightCover.style.right = '-50%';
     this.mainMenu.style.opacity = 0;
@@ -1220,6 +1233,7 @@ class GameCoordinator {
    * Toggles the master volume for the soundManager, and saves the preference to storage
    */
   soundButtonClick() {
+    if (this.destroyed) return;
     const newVolume = this.soundManager.masterVolume === 1 ? 0 : 1;
     this.soundManager.setMasterVolume(newVolume);
     localStorage.setItem('volumePreference', newVolume);
@@ -1462,7 +1476,7 @@ class GameCoordinator {
     this.highScore = localStorage.getItem('highScore');
 
     if (this.firstGame) {
-      setInterval(() => {
+      this.collisionInterval = setInterval(() => {
         this.collisionDetectionLoop();
       }, 500);
 
@@ -1568,6 +1582,43 @@ class GameCoordinator {
 
     this.gameEngine = new GameEngine(this.maxFps, this.entityList);
     this.gameEngine.start();
+  }
+
+  destroy() {
+    window.satsmanPacmanDestroyed = true;
+    this.destroyed = true;
+    this.allowKeyPresses = false;
+    this.allowPacmanMovement = false;
+    this.allowPause = false;
+
+    this.gameStartButton.removeEventListener('click', this.boundStartButtonClick);
+    this.pauseButton.removeEventListener('click', this.boundPauseKey);
+    this.soundButton.removeEventListener('click', this.boundSoundButtonClick);
+    window.removeEventListener('keydown', this.boundKeyDown);
+    window.removeEventListener('swipe', this.boundSwipe);
+    window.removeEventListener('awardPoints', this.boundAwardPoints);
+    window.removeEventListener('deathSequence', this.boundDeathSequence);
+    window.removeEventListener('dotEaten', this.boundDotEaten);
+    window.removeEventListener('powerUp', this.boundPowerUp);
+    window.removeEventListener('eatGhost', this.boundEatGhost);
+    window.removeEventListener('restoreGhost', this.boundRestoreGhost);
+    window.removeEventListener('addTimer', this.boundAddTimer);
+    window.removeEventListener('removeTimer', this.boundRemoveTimer);
+    window.removeEventListener('releaseGhost', this.boundReleaseGhost);
+    document.removeEventListener('touchstart', this.boundTouchStart);
+    document.removeEventListener('touchend', this.boundTouchEnd);
+
+    if (this.gameEngine) this.gameEngine.stop();
+    if (this.collisionInterval) clearInterval(this.collisionInterval);
+
+    if (this.activeTimers) {
+      this.activeTimers.forEach((timer) => {
+        if (timer?.timerId) window.clearTimeout(timer.timerId);
+      });
+      this.activeTimers = [];
+    }
+
+    if (this.soundManager?.destroy) this.soundManager.destroy();
   }
 
   /**
@@ -1755,25 +1806,25 @@ class GameCoordinator {
    * Register listeners for various game sequences
    */
   registerEventListeners() {
-    window.addEventListener('keydown', this.handleKeyDown.bind(this));
-    window.addEventListener('swipe', this.handleSwipe.bind(this));
-    window.addEventListener('awardPoints', this.awardPoints.bind(this));
-    window.addEventListener('deathSequence', this.deathSequence.bind(this));
-    window.addEventListener('dotEaten', this.dotEaten.bind(this));
-    window.addEventListener('powerUp', this.powerUp.bind(this));
-    window.addEventListener('eatGhost', this.eatGhost.bind(this));
-    window.addEventListener('restoreGhost', this.restoreGhost.bind(this));
-    window.addEventListener('addTimer', this.addTimer.bind(this));
-    window.addEventListener('removeTimer', this.removeTimer.bind(this));
-    window.addEventListener('releaseGhost', this.releaseGhost.bind(this));
+    window.addEventListener('keydown', this.boundKeyDown);
+    window.addEventListener('swipe', this.boundSwipe);
+    window.addEventListener('awardPoints', this.boundAwardPoints);
+    window.addEventListener('deathSequence', this.boundDeathSequence);
+    window.addEventListener('dotEaten', this.boundDotEaten);
+    window.addEventListener('powerUp', this.boundPowerUp);
+    window.addEventListener('eatGhost', this.boundEatGhost);
+    window.addEventListener('restoreGhost', this.boundRestoreGhost);
+    window.addEventListener('addTimer', this.boundAddTimer);
+    window.addEventListener('removeTimer', this.boundRemoveTimer);
+    window.addEventListener('releaseGhost', this.boundReleaseGhost);
   }
 
   /**
    * Register listeners for touchstart and touchend to handle mobile device swipes
    */
   registerTouchListeners() {
-    document.addEventListener('touchstart', this.handleTouchStart.bind(this));
-    document.addEventListener('touchend', this.handleTouchEnd.bind(this));
+    document.addEventListener('touchstart', this.boundTouchStart);
+    document.addEventListener('touchend', this.boundTouchEnd);
   }
 
   /**
@@ -2308,6 +2359,10 @@ class GameCoordinator {
    * @param {({ detail: { timer: Object }})} e
    */
   addTimer(e) {
+    if (this.destroyed) {
+      if (e.detail.timer?.timerId) window.clearTimeout(e.detail.timer.timerId);
+      return;
+    }
     this.activeTimers.push(e.detail.timer);
   }
 
@@ -3204,7 +3259,10 @@ class SoundManager {
 
 class Timer {
   constructor(callback, delay) {
-    this.callback = callback;
+    this.callback = () => {
+      if (window.satsmanPacmanDestroyed) return;
+      callback();
+    };
     this.remaining = delay;
     this.resume();
   }

@@ -4,6 +4,7 @@ import { SatsManHeader } from '@/components/game/SatsManHeader';
 declare global {
   interface Window {
     GameCoordinator?: new () => PacmanCoordinator;
+    satsmanPacmanDestroyed?: boolean;
   }
 }
 
@@ -55,6 +56,8 @@ export function PacmanJsGame({ onGameOver }: PacmanJsGameProps) {
   const coordinatorRef = useRef<PacmanCoordinator | null>(null);
 
   const endGame = useCallback((snapshot: { score: number; level: number }) => {
+    window.satsmanPacmanDestroyed = true;
+    if (hostRef.current) hostRef.current.style.display = 'none';
     coordinatorRef.current?.destroy?.();
     coordinatorRef.current = null;
     onGameOver(snapshot);
@@ -74,6 +77,7 @@ export function PacmanJsGame({ onGameOver }: PacmanJsGameProps) {
     loadScript('/pacman/build/app.js')
       .then(() => {
         if (cancelled || !window.GameCoordinator) return;
+        window.satsmanPacmanDestroyed = false;
         coordinatorRef.current = new window.GameCoordinator();
 
         window.setTimeout(() => {
@@ -90,6 +94,7 @@ export function PacmanJsGame({ onGameOver }: PacmanJsGameProps) {
 
     return () => {
       cancelled = true;
+      window.satsmanPacmanDestroyed = true;
       window.removeEventListener('satsman:pacman-game-over', handleGameOver);
       coordinatorRef.current?.destroy?.();
       coordinatorRef.current = null;
