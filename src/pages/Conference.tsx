@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useSeoMeta } from '@unhead/react';
-import { Mail, QrCode, UserX, Zap } from 'lucide-react';
+import { Mail, QrCode, UserX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -66,36 +66,38 @@ export default function Conference() {
   if (user) return <SatsManGame />;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-black p-4 text-white">
-      <div className="w-full max-w-2xl space-y-5">
+    <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,#172554_0%,#030712_42%,#000_100%)] p-4 text-white">
+      <div className="w-full max-w-3xl space-y-5">
         <div className="text-center">
-          <div className="flex items-center justify-center gap-3 text-4xl font-black uppercase text-yellow-300"><Zap className="h-10 w-10" /> Sats-Man</div>
-          <p className="text-sm uppercase tracking-[0.3em] text-zinc-400">Conference Mode</p>
+          <img src="/sats-man-logo.png" alt="Sats-Man" className="mx-auto h-32 w-auto object-contain drop-shadow-[0_0_32px_rgba(250,204,21,0.55)] sm:h-40" />
+          <p className="mt-2 text-sm font-black uppercase tracking-[0.35em] text-cyan-200">Conference Mode</p>
         </div>
 
-        <Card className="border-yellow-400 bg-zinc-950 text-white">
-          <CardContent className="space-y-3 p-5 text-center">
-            <QrCode className="mx-auto h-8 w-8 text-yellow-300" />
-            <h2 className="font-bold uppercase">Scan Nostr Signer</h2>
-            <p className="text-sm text-zinc-400">Use Amber, nsec.app, or any NIP-46 signer.</p>
-            <Button className="w-full bg-yellow-500 text-black hover:bg-yellow-400" onClick={startQrLogin}>Show QR Code</Button>
+        <Card className="border-4 border-yellow-300 bg-black/90 text-white shadow-[0_0_40px_rgba(250,204,21,0.22)]">
+          <CardContent className="space-y-4 p-6 text-center">
+            <QrCode className="mx-auto h-10 w-10 text-yellow-300" />
+            <h2 className="text-xl font-black uppercase tracking-widest text-yellow-300">QR Code Login</h2>
+            <p className="text-sm text-yellow-50/80">Scan with your mobile Nostr signer app. Your private keys stay on your device.</p>
+            <Button className="h-14 w-full border-2 border-yellow-100 bg-yellow-300 text-lg font-black uppercase text-black hover:bg-yellow-200" onClick={startQrLogin}>Show QR Code</Button>
           </CardContent>
         </Card>
 
-        <Card className="border-blue-400 bg-zinc-950 text-white">
-          <CardContent className="space-y-3 p-5 text-center">
-            <Mail className="mx-auto h-8 w-8 text-blue-300" />
-            <h2 className="font-bold uppercase">NIP-05 Identity</h2>
-            <Input value={nip05} onChange={(event) => setNip05(event.target.value)} placeholder="name@example.com" className="bg-black text-center" />
-            <Button className="w-full" onClick={handleNip05Login}>Continue With NIP-05</Button>
+        <Card className="border-4 border-cyan-300 bg-black/90 text-white shadow-[0_0_40px_rgba(34,211,238,0.18)]">
+          <CardContent className="space-y-4 p-6 text-center">
+            <Mail className="mx-auto h-10 w-10 text-cyan-300" />
+            <h2 className="text-xl font-black uppercase tracking-widest text-cyan-300">NIP-05 Login</h2>
+            <p className="text-sm text-cyan-50/80">Enter your Nostr address to link scores to your identity without needing to sign.</p>
+            <Input value={nip05} onChange={(event) => setNip05(event.target.value)} placeholder="name@example.com" className="h-12 border-2 border-cyan-300 bg-black text-center text-cyan-100 placeholder:text-cyan-100/35" />
+            <Button className="h-14 w-full border-2 border-cyan-100 bg-cyan-400 text-lg font-black uppercase text-black hover:bg-cyan-300" onClick={handleNip05Login}>Login With NIP-05</Button>
           </CardContent>
         </Card>
 
-        <Card className="border-zinc-600 bg-zinc-950 text-white">
-          <CardContent className="space-y-3 p-5 text-center">
-            <UserX className="mx-auto h-8 w-8 text-zinc-400" />
-            <h2 className="font-bold uppercase">Ephemeral Player</h2>
-            <Button className="w-full" variant="outline" onClick={handleAnonymous}>Play Anonymously</Button>
+        <Card className="border-4 border-orange-400 bg-black/90 text-white shadow-[0_0_40px_rgba(251,146,60,0.18)]">
+          <CardContent className="space-y-4 p-6 text-center">
+            <UserX className="mx-auto h-10 w-10 text-orange-300" />
+            <h2 className="text-xl font-black uppercase tracking-widest text-orange-300">Anonymous Play</h2>
+            <p className="text-sm text-orange-50/80">Play with a temporary Nostr identity. Scores can publish, but are tied to this ephemeral player.</p>
+            <Button className="h-14 w-full border-2 border-orange-100 bg-orange-500 text-lg font-black uppercase text-black hover:bg-orange-300" onClick={handleAnonymous}>Continue Without Login</Button>
           </CardContent>
         </Card>
 
@@ -103,11 +105,11 @@ export default function Conference() {
       </div>
 
       <Dialog open={qrOpen} onOpenChange={setQrOpen}>
-        <DialogContent className="bg-black text-white sm:max-w-md">
-          <DialogHeader><DialogTitle className="text-center text-yellow-300">Scan With Nostr Signer</DialogTitle></DialogHeader>
+        <DialogContent className="border-4 border-yellow-300 bg-black text-white sm:max-w-md">
+          <DialogHeader><DialogTitle className="text-center text-yellow-300">QR Code Login</DialogTitle></DialogHeader>
           <div className="flex flex-col items-center gap-4">
             {connectUri && <div className="rounded bg-white p-4"><QRCodeCanvas value={connectUri} size={300} /></div>}
-            <p className="text-center text-sm text-zinc-400">{isConnecting && connectParams ? 'Waiting for signer approval...' : 'Open your signer app to approve.'}</p>
+            <p className="text-center text-sm text-yellow-50/80">{isConnecting && connectParams ? 'Waiting for signer approval...' : 'Use Amber, nsec.app, or any NIP-46 compatible signer.'}</p>
           </div>
         </DialogContent>
       </Dialog>
