@@ -36,14 +36,19 @@ export function useScorePublishing() {
     return data.event;
   }, [effectivePubkey, nostr, user]);
 
-  const publishSharePost = useCallback(async (score: number, scoreEventId: string) => {
+  const publishSharePost = useCallback(async (score: number, scoreEventId?: string) => {
     if (!user?.signer) throw new Error('A signer is required to share a score.');
-    const scoreUrl = `${gameConfig.scoreUrlBase}${scoreEventId}`;
+    const scoreUrl = scoreEventId ? `${gameConfig.scoreUrlBase}${scoreEventId}` : null;
     const event = await user.signer.signEvent({
       kind: 1,
       created_at: Math.floor(Date.now() / 1000),
-      content: `I scored ${score} playing Sats-Man on Gamestr.\n\n${scoreUrl}\n\n#satsman #gamestr`,
-      tags: [['t', 'satsman'], ['t', 'gamestr'], ['t', 'gaming'], ['e', scoreEventId, '', 'mention']],
+      content: `I scored ${score} playing Sats-Man on Gamestr.${scoreUrl ? `\n\n${scoreUrl}` : ''}\n\n#satsman #gamestr`,
+      tags: [
+        ['t', 'satsman'],
+        ['t', 'gamestr'],
+        ['t', 'gaming'],
+        ...(scoreEventId ? [['e', scoreEventId, '', 'mention']] : []),
+      ],
     });
     await nostr.event(event);
     return event;

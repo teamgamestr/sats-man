@@ -58,8 +58,8 @@ export function SatsManGame() {
   }, []);
 
   const handleShareScore = useCallback(async () => {
-    if (!scoreEventId || !result) return;
-    await publishSharePost(result.score, scoreEventId);
+    if (!result) return;
+    await publishSharePost(result.score, scoreEventId ?? undefined);
     setShareComplete(true);
   }, [publishSharePost, result, scoreEventId]);
 
@@ -135,7 +135,7 @@ export function SatsManGame() {
                   <ExternalLink className="mr-2 h-4 w-4" /> View Score On Gamestr
                 </Button>
               )}
-              {scoreEventId && canSharePost && !shareComplete && (
+              {canSharePost && !shareComplete && (
                 <Button className="h-12 border-2 border-pink-100 bg-pink-500 font-black uppercase text-black hover:bg-pink-300" onClick={() => void handleShareScore()}>
                   <Share2 className="mr-2 h-4 w-4" /> Share Score On Nostr
                 </Button>
