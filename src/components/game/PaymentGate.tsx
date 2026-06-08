@@ -27,6 +27,7 @@ export function PaymentGate({ onStart }: PaymentGateProps) {
   const { user } = useCurrentUser();
   const login = useLoginActions();
   const { webln, activeNWC } = useWallet();
+  const isAnonymousSession = user?.loginSource?.includes('anonymous') ?? false;
   const [trackedInvoice, setTrackedInvoice] = useState<string | null>(null);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState('');
   const [status, setStatus] = useState<string | null>(null);
@@ -86,8 +87,7 @@ export function PaymentGate({ onStart }: PaymentGateProps) {
     unlockPacmanAudio();
     login.anonymous(undefined, { source: 'anonymous' });
     sessionStorage.setItem('satsman_session_origin', window.location.pathname === '/conference' ? '/conference' : '/');
-    onStart({ sessionId: getSessionId(), paid: false });
-  }, [getSessionId, login, onStart]);
+  }, [login]);
 
   const openAuth = useCallback((step: 'login' | 'generate') => {
     unlockPacmanAudio();
@@ -186,11 +186,6 @@ export function PaymentGate({ onStart }: PaymentGateProps) {
                 <Play className="mr-2 h-5 w-5" /> Anon
               </Button>
             </div>
-            {gameConfig.freePlayEnabled && (
-              <Button className="pacman-btn pacman-btn-yellow w-full py-6 text-lg" onClick={handleFreePlay}>
-                Quick Free Play
-              </Button>
-            )}
             <AuthDialog
               key={authInitialStep}
               isOpen={authDialogOpen}
@@ -204,7 +199,7 @@ export function PaymentGate({ onStart }: PaymentGateProps) {
               {isZapping || isAwaitingReceipt ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Zap className="mr-2 h-4 w-4" />}
               {skipAutomaticPayment ? `Get Invoice (${gameConfig.costToPlay} sats)` : `Zap ${gameConfig.costToPlay} sats`}
             </Button>
-            {gameConfig.freePlayEnabled && (
+            {gameConfig.freePlayEnabled && !isAnonymousSession && (
               <Button className="pacman-btn pacman-btn-yellow w-full py-6 text-lg" variant="outline" onClick={handleFreePlay}>
                 Play Free
               </Button>
