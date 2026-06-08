@@ -27,6 +27,56 @@ This project is a Nostr client application built with React 19.x, TailwindCSS 4.
 
 **Always read an existing file before modifying it.** Never write over `App.tsx`, `AppRouter.tsx`, or `NostrProvider` without first reading their contents.
 
+## Sats-Man Build Context
+
+This app is Sats-Man: a Gamestr/Nostr/Lightning wrapper around `bward2/pacman-js`, folded into mkstack rather than replacing mkstack. The upstream Pacman code and assets are vendored under `public/pacman/`; the active wrapper is `src/components/game/PacmanJsGame.tsx`. Keep mkstack responsible for auth, payments, conference mode, score publishing, routing, and app shell.
+
+- Main route `/` renders `SatsManGame` via `src/pages/Index.tsx`.
+- `/conference` renders kiosk/conference login in `src/pages/Conference.tsx`.
+- Game config lives in `src/config/gameConfig.ts`: cost, receiver pubkey, fallback Lightning address, free play, test mode, score URL base.
+- `public/sats-man-logo.png` is the current app logo used in menus/header/manifest.
+- `public/pacman/build/app.js` is a patched vendored browser bundle. It exposes `window.GameCoordinator`, dispatches `satsman:pacman-game-over`, rewrites asset paths to `/pacman/...`, supports Web Audio unlock, and has a custom `destroy()` path. Be careful when replacing it from upstream; reapply these patches.
+- `PacmanJsGame` loads `/pacman/build/app.css` and `/pacman/build/app.js`, mounts the DOM expected by upstream Pacman, starts automatically, and calls `destroy()` before handing off to React game-over UI.
+- The old `SatsManCanvas.tsx` was a temporary sample game and is not the active game.
+
+### Payment Flow
+
+- `PaymentGate` controls identity, free play, zaps, invoice fallback, and receipt waiting.
+- `Anon` creates an ephemeral Nostr identity; it does not bypass payment unless `gameConfig.freePlayEnabled` is true and the player presses `Play Free`.
+- Logged-in users do not auto-start games after auth. They return to the gate and must zap/get invoice or press `Play Free` when enabled.
+- Zap receiver pubkey is `5a625acc4312b5b56c735e7eb0fa48521ec9a5fe72bef0015b0ca62f3c4e09b6` (`npub1tf394nzrz26m2mrnteltp7jg2g0vnf07w2l0qq2mpjnz70zwpxmqlajaz8`).
+- Fallback Lightning address is `saltybrow17@walletofsatoshi.com`; use it if receiver kind-0 is missing or has no `lud16`/`lud06` zap endpoint.
+- Payment-specific relays are in `src/lib/paymentRelays.ts`; default app relays include `wss://relay.gamestr.io`.
+- `useZaps` must fall back to displaying an invoice QR when NWC or WebLN automatic payment fails after invoice creation.
+
+### Score Publishing
+
+- Scores use kind `30762` with `game=sats-man`, `score`, `state=final`, `difficulty=level-N`, `duration`, `version`, `genre`, and NIP-31 `alt` tags.
+- Production signing uses `/api/sign-score` and `SATSMAN_NSEC` from env. `server.js` serves this route after build.
+- Vite dev also serves `/api/sign-score` via middleware in `vite.config.ts`, so `npm run dev` can sign scores locally.
+- Local `.env` should contain `SATSMAN_NSEC=...`; `.env` is gitignored and must never be committed.
+- `gameConfig.testMode` currently allows client-signed test score events to be published directly to relays with `['mode', 'test']`. When `testMode` is false, use server signing.
+- Sharing a score as a kind-1 note must work even if server score signing fails. Include the Gamestr score URL only when a signed score event exists.
+
+### Styling Direction
+
+- Use dark Pacman/neon styling throughout app-specific UI. Avoid default white/gray mkstack modal surfaces for Sats-Man flows.
+- Shared CSS classes in `src/index.css`: `pacman-panel`, `pacman-panel-title`, `pacman-muted`, `pacman-input`, `pacman-soft-card`, `pacman-menu-content`, `pacman-menu-item`, `pacman-menu-danger`, and `pacman-btn*` variants.
+- Top-right account dropdown, auth dialog, wallet modal, conference page, payment gate, and game-over screen should all use the dark neon Pacman style.
+- Header logout is intentionally only in the account dropdown, not as a duplicate top-level button.
+
+### Conference Mode
+
+- Conference copy should mirror Blockstr language: `QR Code Login`, `NIP-05 Login`, `Anonymous Play`.
+- Conference session origin is stored as `satsman_session_origin=/conference`.
+- In conference game-over, the logout action says `Log Out For Next Player` and returns to `/conference`.
+
+### Current Git Remote
+
+- Repository root is `game/`.
+- Remote is `git@github.com:teamgamestr/sats-man.git`.
+- Pushes go to `master` unless the branch strategy changes.
+
 ## UI Components
 
 Components in `@/components/ui` are unstyled, accessible primitives styled with Tailwind. They follow a consistent React 19 pattern: plain function components that type props via `React.ComponentProps<...>` and forward `ref` as a normal prop (no `React.forwardRef`), tag their root with a `data-slot` attribute, merge classes with the `cn()` utility, and define variants with `class-variance-authority`. Components built on Radix import from the unified `radix-ui` package (e.g. `import { Dialog as DialogPrimitive } from "radix-ui"`), not individual `@radix-ui/react-*` packages. When you need a specific component, list the directory (`ls src/components/ui/`) or import from `@/components/ui/<name>` — all common primitives are present (buttons, inputs, dialogs, dropdowns, forms, tables, etc.).
