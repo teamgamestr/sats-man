@@ -27,7 +27,6 @@ export function PaymentGate({ onStart }: PaymentGateProps) {
   const { user } = useCurrentUser();
   const login = useLoginActions();
   const { webln, activeNWC } = useWallet();
-  const isAnonymousSession = user?.loginSource?.includes('anonymous') ?? false;
   const [trackedInvoice, setTrackedInvoice] = useState<string | null>(null);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState('');
   const [status, setStatus] = useState<string | null>(null);
@@ -186,7 +185,7 @@ export function PaymentGate({ onStart }: PaymentGateProps) {
               {isZapping || isAwaitingReceipt ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Zap className="mr-2 h-4 w-4" />}
               {skipAutomaticPayment ? `Get Invoice (${gameConfig.costToPlay} sats)` : `Zap ${gameConfig.costToPlay} sats`}
             </Button>
-            {gameConfig.freePlayEnabled && !isAnonymousSession && (
+            {gameConfig.freePlayEnabled && (
               <Button className="pacman-btn pacman-btn-yellow w-full py-6 text-lg" variant="outline" onClick={handleFreePlay}>
                 Play Free
               </Button>
