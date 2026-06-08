@@ -55,7 +55,7 @@ This app is Sats-Man: a Gamestr/Nostr/Lightning wrapper around `bward2/pacman-js
 - Production signing uses `/api/sign-score` and `SATSMAN_NSEC` from env. `server.js` serves this route after build.
 - Vite dev also serves `/api/sign-score` via middleware in `vite.config.ts`, so `npm run dev` can sign scores locally.
 - Local `.env` should contain `SATSMAN_NSEC=...`; `.env` is gitignored and must never be committed.
-- `gameConfig.testMode` currently allows client-signed test score events to be published directly to relays with `['mode', 'test']`. When `testMode` is false, use server signing.
+- `gameConfig.testMode` currently allows client-signed test score events to be published directly with `['mode', 'test']`. When `testMode` is true, score events MUST publish only to `gameConfig.testModeRelays` (`wss://test.gamestr.io`) and no normal app relays. When `testMode` is false, use server signing.
 - Sharing a score as a kind-1 note must work even if server score signing fails. Include the Gamestr score URL only when a signed score event exists.
 
 ### Styling Direction

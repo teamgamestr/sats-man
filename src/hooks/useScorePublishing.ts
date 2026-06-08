@@ -44,7 +44,7 @@ export function useScorePublishing() {
           ...(options.bolt11 ? [['bolt11', options.bolt11]] : []),
         ],
       });
-      await nostr.event(signedEvent);
+      await nostr.group(gameConfig.testModeRelays).event(signedEvent);
       return signedEvent as NostrEvent;
     }
 

@@ -8,6 +8,7 @@ export interface GameConfig {
   zapMemo: string;
   freePlayEnabled: boolean;
   testMode: boolean;
+  testModeRelays: string[];
   scoreUrlBase: string;
 }
 
@@ -21,5 +22,6 @@ export const gameConfig: GameConfig = {
   zapMemo: 'Playing Sats-Man on Gamestr',
   freePlayEnabled: true,
   testMode: true,
+  testModeRelays: ['wss://test.gamestr.io'],
   scoreUrlBase: 'https://gamestr.io/sats-man/score/',
 };
