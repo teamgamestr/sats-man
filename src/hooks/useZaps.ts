@@ -4,8 +4,7 @@ import { useNostr } from '@nostrify/react';
 import type { NostrEvent } from '@nostrify/nostrify';
 import { nip57 } from 'nostr-tools';
 import type { Event, EventTemplate } from 'nostr-tools';
-import { APP_RELAYS } from '@/lib/appRelays';
-import { useAuthor } from '@/hooks/useAuthor';
+import { PAYMENT_RELAYS } from '@/lib/paymentRelays';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useNWC } from '@/hooks/useNWCContext';
 import type { NWCConnection } from '@/hooks/useNWC';
@@ -27,7 +26,6 @@ export function useZaps(
 ) {
   const { nostr } = useNostr();
   const { user } = useCurrentUser();
-  const author = useAuthor(target.pubkey);
   const { sendPayment, getActiveConnection } = useNWC();
   const queryClient = useQueryClient();
   const [isZapping, setIsZapping] = useState(false);
@@ -38,13 +36,13 @@ export function useZaps(
 
   const query = useQuery<NostrEvent[]>({
     queryKey,
-    queryFn: async (context) => nostr.query(filters, { signal: AbortSignal.any([context.signal, AbortSignal.timeout(6000)]) }),
+    queryFn: async (context) => nostr.group(PAYMENT_RELAYS).query(filters, { signal: AbortSignal.any([context.signal, AbortSignal.timeout(6000)]) }),
     staleTime: 15000,
   });
 
   useEffect(() => {
     const controller = new AbortController();
-    const sub = nostr.req(filters.map((filter) => ({ ...filter, since: Math.floor(Date.now() / 1000) })), { signal: controller.signal });
+    const sub = nostr.group(PAYMENT_RELAYS).req(filters.map((filter) => ({ ...filter, since: Math.floor(Date.now() / 1000) })), { signal: controller.signal });
 
     (async () => {
       try {
@@ -68,20 +66,21 @@ export function useZaps(
     setIsZapping(true);
     setInvoice(null);
     try {
-      let authorData = author.data;
-      if (!authorData?.event || !authorData.metadata) {
-        const refreshed = await author.refetch({ throwOnError: false });
-        authorData = refreshed.data ?? authorData;
+      const [recipientProfile] = await nostr.group(PAYMENT_RELAYS).query(
+        [{ kinds: [0], authors: [target.pubkey], limit: 1 }],
+        { signal: AbortSignal.timeout(8000) },
+      );
+      if (!recipientProfile) {
+        throw new Error('Zap recipient profile not found on configured relays. Publish the payment account profile to relay.gamestr.io with a Lightning address.');
       }
-      if (!authorData?.event || !authorData.metadata) throw new Error('Could not load payment recipient profile.');
 
-      const zapEndpoint = await nip57.getZapEndpoint(authorData.event);
-      if (!zapEndpoint) throw new Error('Payment recipient has no zap endpoint.');
+      const zapEndpoint = await nip57.getZapEndpoint(recipientProfile as Event);
+      if (!zapEndpoint) throw new Error('Payment recipient profile has no Lightning zap endpoint. Add lud16 or lud06 to the profile.');
 
       const zapRequest = nip57.makeZapRequest({
         pubkey: target.pubkey,
         amount: amount * 1000,
-        relays: APP_RELAYS.relays.filter((relay) => relay.read).map((relay) => relay.url),
+        relays: PAYMENT_RELAYS,
         comment,
       }) as EventTemplate;
       const signedZapRequest = await user.signer.signEvent(zapRequest);
@@ -115,7 +114,7 @@ export function useZaps(
     } finally {
       setIsZapping(false);
     }
-  }, [author, getActiveConnection, nwcConnection, queryClient, queryKey, sendPayment, skipAutomaticPayment, target.pubkey, user, webln]);
+  }, [getActiveConnection, nostr, nwcConnection, queryClient, queryKey, sendPayment, skipAutomaticPayment, target.pubkey, user, webln]);
 
   return {
     zap,

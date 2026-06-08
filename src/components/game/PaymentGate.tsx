@@ -121,15 +121,19 @@ export function PaymentGate({ onStart }: PaymentGateProps) {
     unlockPacmanAudio();
     setStatus(null);
     const sessionId = getSessionId();
-    const result = await zap(gameConfig.costToPlay, `${gameConfig.zapMemo} | session:${sessionId}`);
-    if (!result?.invoice) {
-      setStatus('Could not create invoice. Try again.');
-      return;
+    try {
+      const result = await zap(gameConfig.costToPlay, `${gameConfig.zapMemo} | session:${sessionId}`);
+      if (!result?.invoice) {
+        setStatus('Could not create invoice. Try again.');
+        return;
+      }
+      setTrackedInvoice(result.invoice);
+      setIsAwaitingReceipt(true);
+      setStatus(result.autoPaid ? 'Payment sent. Waiting for zap receipt...' : 'Invoice ready. Waiting for zap receipt...');
+      void refetch();
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : 'Zap invoice failed. Check the payment account profile and relays.');
     }
-    setTrackedInvoice(result.invoice);
-    setIsAwaitingReceipt(true);
-    setStatus(result.autoPaid ? 'Payment sent. Waiting for zap receipt...' : 'Invoice ready. Waiting for zap receipt...');
-    void refetch();
   }, [getSessionId, refetch, user, zap]);
 
   if (invoice) {

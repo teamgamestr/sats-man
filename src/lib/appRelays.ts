@@ -7,6 +7,7 @@ import type { RelayMetadata } from '@/contexts/AppContext';
  */
 export const APP_RELAYS: RelayMetadata = {
   relays: [
+    { url: 'wss://relay.gamestr.io', read: true, write: true },
     { url: 'wss://relay.ditto.pub', read: true, write: true },
     { url: 'wss://relay.primal.net', read: true, write: true },
     { url: 'wss://relay.damus.io', read: true, write: true },
