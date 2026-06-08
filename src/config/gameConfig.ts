@@ -7,6 +7,7 @@ export interface GameConfig {
   costToPlay: number;
   zapMemo: string;
   freePlayEnabled: boolean;
+  testMode: boolean;
   scoreUrlBase: string;
 }
 
@@ -19,5 +20,6 @@ export const gameConfig: GameConfig = {
   costToPlay: 210,
   zapMemo: 'Playing Sats-Man on Gamestr',
   freePlayEnabled: true,
+  testMode: true,
   scoreUrlBase: 'https://gamestr.io/sats-man/score/',
 };

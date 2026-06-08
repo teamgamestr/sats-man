@@ -20,6 +20,34 @@ export function useScorePublishing() {
   const publishScore = useCallback(async (options: ScorePublishingOptions): Promise<NostrEvent> => {
     if (!user) throw new Error('User must be logged in to publish scores.');
     const playerPubkey = effectivePubkey ?? user.pubkey;
+
+    if (gameConfig.testMode) {
+      if (!user.signer) throw new Error('A signer is required to publish test scores.');
+      const signedEvent = await user.signer.signEvent({
+        kind: 30762,
+        created_at: Math.floor(Date.now() / 1000),
+        content: '',
+        tags: [
+          ['d', options.sessionId],
+          ['p', playerPubkey],
+          ['game', gameConfig.gameId],
+          ['score', String(options.score)],
+          ['state', 'final'],
+          ['difficulty', `level-${options.level}`],
+          ['duration', String(options.duration)],
+          ['version', gameConfig.gameVersion],
+          ['genre', 'arcade'],
+          ['genre', 'retro'],
+          ['mode', 'test'],
+          ['alt', `Test game score: ${options.score} in ${gameConfig.gameName}`],
+          ...(options.paymentReceiptId ? [['e', options.paymentReceiptId, '', 'zap-receipt']] : []),
+          ...(options.bolt11 ? [['bolt11', options.bolt11]] : []),
+        ],
+      });
+      await nostr.event(signedEvent);
+      return signedEvent as NostrEvent;
+    }
+
     const response = await fetch('/api/sign-score', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
