@@ -191,7 +191,7 @@
 
 @layer components {
   .pacman-btn {
-    @apply border-2 bg-black font-black uppercase transition-all hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 disabled:translate-y-0 disabled:opacity-60;
+    @apply !border-2 !bg-black font-black uppercase transition-all hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 disabled:translate-y-0 disabled:opacity-60;
   }
 
   .pacman-btn-yellow {
@@ -244,6 +244,15 @@
 
   .pacman-menu-danger {
     @apply text-orange-200 focus:border-orange-300 focus:bg-orange-400/15 focus:text-orange-100 data-[highlighted]:border-orange-300 data-[highlighted]:bg-orange-400/15 data-[highlighted]:text-orange-100;
+  }
+
+  .pacman-panel button:not(.pacman-btn):not([data-slot="dialog-close"]),
+  .pacman-menu-content button:not(.pacman-btn) {
+    @apply !border-2 !border-cyan-300 !bg-black !text-cyan-200 shadow-[0_0_18px_rgba(34,211,238,0.14)] hover:!border-cyan-100 hover:!bg-cyan-300/15 hover:!text-cyan-100 hover:shadow-[0_0_28px_rgba(34,211,238,0.30)] focus-visible:!ring-4 focus-visible:!ring-cyan-300/50;
+  }
+
+  .pacman-panel button[data-slot="dialog-close"] {
+    @apply !border !border-yellow-300/60 !bg-black !text-yellow-200 hover:!bg-yellow-300/15 hover:!text-yellow-100 focus-visible:!ring-4 focus-visible:!ring-yellow-300/50;
   }
 }
 
