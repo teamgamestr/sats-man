@@ -106,14 +106,22 @@ export function useZaps(
 
       const activeConnection = nwcConnection ?? getActiveConnection();
       if (activeConnection) {
-        await sendPayment(activeConnection, data.pr);
-        queryClient.invalidateQueries({ queryKey });
-        return { invoice: data.pr, autoPaid: true };
+        try {
+          await sendPayment(activeConnection, data.pr);
+          queryClient.invalidateQueries({ queryKey });
+          return { invoice: data.pr, autoPaid: true };
+        } catch (error) {
+          console.warn('NWC payment failed, falling back to invoice QR:', error);
+        }
       }
       if (webln) {
-        await webln.sendPayment(data.pr);
-        queryClient.invalidateQueries({ queryKey });
-        return { invoice: data.pr, autoPaid: true };
+        try {
+          await webln.sendPayment(data.pr);
+          queryClient.invalidateQueries({ queryKey });
+          return { invoice: data.pr, autoPaid: true };
+        } catch (error) {
+          console.warn('WebLN payment failed, falling back to invoice QR:', error);
+        }
       }
 
       setInvoice(data.pr);
