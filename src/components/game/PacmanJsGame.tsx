@@ -1,10 +1,14 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { SatsManHeader } from '@/components/game/SatsManHeader';
 
 declare global {
   interface Window {
-    GameCoordinator?: new () => unknown;
+    GameCoordinator?: new () => PacmanCoordinator;
   }
+}
+
+interface PacmanCoordinator {
+  destroy?: () => void;
 }
 
 interface PacmanGameOverDetail {
@@ -48,7 +52,13 @@ function loadScript(src: string): Promise<void> {
 
 export function PacmanJsGame({ onGameOver }: PacmanJsGameProps) {
   const hostRef = useRef<HTMLDivElement>(null);
-  const coordinatorRef = useRef<unknown>(null);
+  const coordinatorRef = useRef<PacmanCoordinator | null>(null);
+
+  const endGame = useCallback((snapshot: { score: number; level: number }) => {
+    coordinatorRef.current?.destroy?.();
+    coordinatorRef.current = null;
+    onGameOver(snapshot);
+  }, [onGameOver]);
 
   useEffect(() => {
     let cancelled = false;
@@ -57,7 +67,7 @@ export function PacmanJsGame({ onGameOver }: PacmanJsGameProps) {
 
     const handleGameOver = (event: Event) => {
       const detail = (event as CustomEvent<PacmanGameOverDetail>).detail;
-      onGameOver({ score: Number(detail.score) || 0, level: Number(detail.level) || 1 });
+      endGame({ score: Number(detail.score) || 0, level: Number(detail.level) || 1 });
     };
     window.addEventListener('satsman:pacman-game-over', handleGameOver);
 
@@ -81,15 +91,16 @@ export function PacmanJsGame({ onGameOver }: PacmanJsGameProps) {
     return () => {
       cancelled = true;
       window.removeEventListener('satsman:pacman-game-over', handleGameOver);
+      coordinatorRef.current?.destroy?.();
       coordinatorRef.current = null;
       const audioElements = host?.querySelectorAll('audio');
       audioElements?.forEach((audio) => audio.pause());
     };
-  }, [onGameOver]);
+  }, [endGame]);
 
   return (
     <div className="min-h-screen bg-black pt-16 text-white">
-      <SatsManHeader onLogoClick={() => onGameOver({ score: 0, level: 1 })} />
+      <SatsManHeader onLogoClick={() => endGame({ score: 0, level: 1 })} />
       <div ref={hostRef} className="satsman-pacman-host">
         <div id="overflow-mask" className="overflow-mask">
           <div id="fps-display" className="fps-display" />

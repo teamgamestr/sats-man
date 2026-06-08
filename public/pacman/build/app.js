@@ -3189,6 +3189,16 @@ class SoundManager {
       this.ambienceSource.stop();
     }
   }
+
+  destroy() {
+    this.stopAmbience();
+
+    if (this.soundEffect?.stop) {
+      this.soundEffect.stop();
+    } else if (this.soundEffect?.pause) {
+      this.soundEffect.pause();
+    }
+  }
 }
 
 
