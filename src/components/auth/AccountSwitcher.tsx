@@ -30,7 +30,7 @@ export function AccountSwitcher({ onAddAccountClick }: AccountSwitcherProps) {
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
-        <button className='flex h-11 items-center gap-2 rounded-full border-2 border-yellow-300 bg-black p-1 pr-3 text-yellow-100 transition-all hover:bg-yellow-300 hover:text-black focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-300/60'>
+        <button className='flex h-11 items-center gap-2 rounded-full border-2 border-yellow-300 bg-black p-1 pr-3 text-yellow-100 shadow-[0_0_18px_rgba(250,204,21,0.16)] transition-all hover:bg-yellow-300/15 hover:text-yellow-100 hover:shadow-[0_0_28px_rgba(250,204,21,0.34)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-300/60'>
           <Avatar className='h-8 w-8 border border-yellow-300'>
             <AvatarImage
               src={currentUser.metadata.picture}

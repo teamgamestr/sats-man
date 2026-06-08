@@ -191,27 +191,27 @@
 
 @layer components {
   .pacman-btn {
-    @apply border-2 font-black uppercase text-black transition-all hover:-translate-y-0.5 hover:shadow-[0_0_24px_rgba(255,255,255,0.24)] focus-visible:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/70 disabled:translate-y-0 disabled:opacity-60;
+    @apply border-2 bg-black font-black uppercase transition-all hover:-translate-y-0.5 focus-visible:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 disabled:translate-y-0 disabled:opacity-60;
   }
 
   .pacman-btn-yellow {
-    @apply border-yellow-100 bg-yellow-300 hover:border-yellow-50 hover:bg-yellow-200 focus-visible:bg-yellow-200;
+    @apply border-yellow-300 text-yellow-200 shadow-[0_0_18px_rgba(250,204,21,0.16)] hover:border-yellow-100 hover:bg-yellow-300/15 hover:text-yellow-100 hover:shadow-[0_0_28px_rgba(250,204,21,0.34)] focus-visible:ring-yellow-300/50;
   }
 
   .pacman-btn-cyan {
-    @apply border-cyan-100 bg-cyan-400 hover:border-cyan-50 hover:bg-cyan-300 focus-visible:bg-cyan-300;
+    @apply border-cyan-300 text-cyan-200 shadow-[0_0_18px_rgba(34,211,238,0.14)] hover:border-cyan-100 hover:bg-cyan-300/15 hover:text-cyan-100 hover:shadow-[0_0_28px_rgba(34,211,238,0.30)] focus-visible:ring-cyan-300/50;
   }
 
   .pacman-btn-pink {
-    @apply border-pink-100 bg-pink-500 hover:border-pink-50 hover:bg-pink-300 focus-visible:bg-pink-300;
+    @apply border-pink-400 text-pink-200 shadow-[0_0_18px_rgba(244,114,182,0.14)] hover:border-pink-100 hover:bg-pink-400/15 hover:text-pink-100 hover:shadow-[0_0_28px_rgba(244,114,182,0.30)] focus-visible:ring-pink-300/50;
   }
 
   .pacman-btn-orange {
-    @apply border-orange-100 bg-orange-500 hover:border-orange-50 hover:bg-orange-300 focus-visible:bg-orange-300;
+    @apply border-orange-400 text-orange-200 shadow-[0_0_18px_rgba(251,146,60,0.14)] hover:border-orange-100 hover:bg-orange-400/15 hover:text-orange-100 hover:shadow-[0_0_28px_rgba(251,146,60,0.30)] focus-visible:ring-orange-300/50;
   }
 
   .pacman-btn-dark-orange {
-    @apply border-orange-300 bg-black text-orange-100 hover:border-orange-100 hover:bg-orange-500 hover:text-black focus-visible:bg-orange-500 focus-visible:text-black;
+    @apply border-orange-400 text-orange-200 shadow-[0_0_18px_rgba(251,146,60,0.14)] hover:border-orange-100 hover:bg-orange-400/15 hover:text-orange-100 hover:shadow-[0_0_28px_rgba(251,146,60,0.30)] focus-visible:ring-orange-300/50;
   }
 
   .pacman-panel {
@@ -231,7 +231,7 @@
   }
 
   .pacman-soft-card {
-    @apply rounded-lg border-2 border-blue-700 bg-blue-950/35 text-blue-50;
+    @apply rounded-lg border-2 border-blue-700 bg-black text-blue-50 shadow-[inset_0_0_22px_rgba(29,78,216,0.18)];
   }
 
   .pacman-menu-content {
@@ -239,11 +239,11 @@
   }
 
   .pacman-menu-item {
-    @apply cursor-pointer rounded-md px-2 py-2 font-black uppercase tracking-wide text-cyan-100 outline-none focus:bg-cyan-400 focus:text-black data-[highlighted]:bg-cyan-400 data-[highlighted]:text-black;
+    @apply cursor-pointer rounded-md border border-transparent px-2 py-2 font-black uppercase tracking-wide text-cyan-100 outline-none focus:border-cyan-300 focus:bg-cyan-300/15 focus:text-cyan-100 data-[highlighted]:border-cyan-300 data-[highlighted]:bg-cyan-300/15 data-[highlighted]:text-cyan-100;
   }
 
   .pacman-menu-danger {
-    @apply text-orange-200 focus:bg-orange-500 focus:text-black data-[highlighted]:bg-orange-500 data-[highlighted]:text-black;
+    @apply text-orange-200 focus:border-orange-300 focus:bg-orange-400/15 focus:text-orange-100 data-[highlighted]:border-orange-300 data-[highlighted]:bg-orange-400/15 data-[highlighted]:text-orange-100;
   }
 }
 
