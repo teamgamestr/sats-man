@@ -146,7 +146,7 @@ export function SatsManGame() {
               <Button className="h-12 border-2 border-yellow-100 bg-yellow-300 font-black uppercase text-black hover:bg-yellow-200" onClick={handlePlayAgain}>
                 <Play className="mr-2 h-4 w-4" /> Play Again
               </Button>
-              <Button className="h-12 border-2 border-zinc-500 bg-zinc-950 font-black uppercase text-zinc-100 hover:bg-zinc-900" variant="outline" onClick={handleLogout}>
+              <Button className="h-12 border-2 border-orange-300 bg-black font-black uppercase text-orange-100 hover:border-orange-100 hover:bg-orange-500 hover:text-black focus-visible:border-orange-100 focus-visible:bg-orange-500 focus-visible:text-black" variant="outline" onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" /> {isConferenceMode ? 'Log Out For Next Player' : 'Logout'}
               </Button>
             </div>
