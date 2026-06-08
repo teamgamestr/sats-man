@@ -9,6 +9,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
+const SCORE_TEST_MODE = process.env.SATSMAN_TEST_MODE !== 'false';
+const SCORE_TEST_RELAYS = ['wss://test.gamestr.io'];
 
 app.use(express.json({ limit: '128kb' }));
 
@@ -57,7 +59,10 @@ app.post('/api/sign-score', (req, res) => {
       tags,
     }, signerKey);
 
-    res.json({ event });
+    res.json({
+      event,
+      relays: SCORE_TEST_MODE ? SCORE_TEST_RELAYS : undefined,
+    });
   } catch (error) {
     res.status(500).json({ error: error instanceof Error ? error.message : 'Failed to sign score' });
   }

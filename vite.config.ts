@@ -7,6 +7,7 @@ import "dotenv/config";
 import { hexToBytes } from "@noble/hashes/utils";
 import { finalizeEvent, nip19 } from "nostr-tools";
 import { defineConfig } from "vitest/config";
+import { gameConfig } from "./src/config/gameConfig";
 
 function getSignerKey() {
   const raw = process.env.SATSMAN_NSEC;
@@ -74,7 +75,10 @@ async function handleSignScore(req: IncomingMessage, res: ServerResponse) {
       tags,
     }, signerKey);
 
-    sendJson(res, 200, { event });
+    sendJson(res, 200, {
+      event,
+      relays: gameConfig.testMode ? gameConfig.testModeRelays : undefined,
+    });
   } catch (error) {
     sendJson(res, 500, { error: error instanceof Error ? error.message : "Failed to sign score" });
   }

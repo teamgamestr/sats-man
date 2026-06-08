@@ -59,8 +59,12 @@ export function useScorePublishing() {
       throw new Error(data.error ?? 'Score signing failed.');
     }
 
-    const data = await response.json() as { event: NostrEvent };
-    await nostr.event(data.event);
+    const data = await response.json() as { event: NostrEvent; relays?: string[] };
+    if (data.relays?.length) {
+      await nostr.group(data.relays).event(data.event);
+    } else {
+      await nostr.event(data.event);
+    }
     return data.event;
   }, [effectivePubkey, nostr, user]);
 
