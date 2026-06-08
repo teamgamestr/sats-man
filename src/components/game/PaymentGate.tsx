@@ -34,7 +34,6 @@ export function PaymentGate({ onStart }: PaymentGateProps) {
   const [isAwaitingReceipt, setIsAwaitingReceipt] = useState(false);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [authInitialStep, setAuthInitialStep] = useState<'login' | 'generate'>('login');
-  const [pendingAuthStart, setPendingAuthStart] = useState(false);
   const sessionIdRef = useRef<string | null>(null);
 
   const getSessionId = useCallback(() => {
@@ -92,20 +91,8 @@ export function PaymentGate({ onStart }: PaymentGateProps) {
   const openAuth = useCallback((step: 'login' | 'generate') => {
     unlockPacmanAudio();
     setAuthInitialStep(step);
-    setPendingAuthStart(true);
     setAuthDialogOpen(true);
   }, []);
-
-  useEffect(() => {
-    if (!pendingAuthStart || !user || authDialogOpen) return undefined;
-
-    const timer = window.setTimeout(() => {
-      setPendingAuthStart(false);
-      onStart({ sessionId: getSessionId(), paid: false });
-    }, 0);
-
-    return () => window.clearTimeout(timer);
-  }, [authDialogOpen, getSessionId, onStart, pendingAuthStart, user]);
 
   const handleFreePlay = useCallback(() => {
     unlockPacmanAudio();
