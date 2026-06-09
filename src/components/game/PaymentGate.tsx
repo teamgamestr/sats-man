@@ -163,17 +163,17 @@ export function PaymentGate({ onStart }: PaymentGateProps) {
           <div className="space-y-4 text-center">
             <div className="grid gap-3 sm:grid-cols-3">
               <Button className="pacman-btn pacman-btn-cyan h-16 text-lg" onClick={() => openAuth('login')}>
-                Login <Play className="ml-2 h-5 w-5" />
+                Login + <Play className="ml-2 h-5 w-5" />
               </Button>
               <Button className="pacman-btn pacman-btn-pink h-16 text-lg" onClick={() => openAuth('generate')}>
-                Sign-up <Play className="ml-2 h-5 w-5" />
+                Sign-up + <Play className="ml-2 h-5 w-5" />
               </Button>
               <Button className="pacman-btn pacman-btn-orange h-16 text-lg" onClick={handleAnonymous}>
                 Anon <Play className="ml-2 h-5 w-5" />
               </Button>
             </div>
             <p className="mx-auto max-w-md text-sm leading-relaxed text-cyan-50/75">
-              Login with Nostr on Sign Up so you can share your scores on{' '}
+              Login with Nostr or sign-up so you can share your scores on{' '}
               <a
                 href="https://gamestr.io"
                 target="_blank"
