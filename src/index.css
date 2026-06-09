@@ -282,75 +282,23 @@
   display: none;
 }
 
-.satsman-pacman-host .satsman-ghost-legend {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.25rem;
-  max-width: 48rem;
-  margin: 0.375rem auto 0;
-  color: white;
-  font-size: 0.5rem;
-  line-height: 1;
-  text-transform: uppercase;
-  text-shadow: 0 0 8px rgb(0 0 0 / 0.9);
-}
-
-.satsman-pacman-host .satsman-ghost-legend-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  border: 1px solid currentcolor;
-  border-radius: 999px;
-  background: rgb(0 0 0 / 0.82);
-  padding: 0.25rem 0.375rem;
-  box-shadow: 0 0 12px color-mix(in srgb, currentcolor 32%, transparent);
-}
-
-.satsman-pacman-host .satsman-ghost-legend-symbol {
-  display: inline-grid;
-  place-items: center;
-  width: 0.875rem;
-  height: 0.875rem;
-  background: currentcolor;
-  color: black;
-  font-size: 0.6rem;
-}
-
-.satsman-pacman-host .satsman-ghost-dollar {
-  color: #6ee7b7;
-}
-
-.satsman-pacman-host .satsman-ghost-ether {
-  color: #c4b5fd;
-}
-
-.satsman-pacman-host .satsman-ghost-tether {
-  color: #34d399;
-}
-
-.satsman-pacman-host .satsman-ghost-doge {
-  color: #facc15;
-}
-
 .satsman-pacman-host .ghost::after {
   position: absolute;
-  top: 28%;
+  top: -0.7rem;
   left: 50%;
-  display: grid;
-  place-items: center;
-  width: 42%;
-  height: 42%;
-  border: 1px solid rgb(0 0 0 / 0.75);
-  background: rgb(0 0 0 / 0.78);
-  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.25), 0 0 8px currentcolor;
+  z-index: 3;
+  border: 1px solid currentcolor;
+  background: rgb(0 0 0 / 0.84);
+  box-shadow: 0 0 8px currentcolor;
   color: currentcolor;
   font-family: "Press Start 2P", monospace;
-  font-size: 36%;
+  font-size: 0.3rem;
   line-height: 1;
+  padding: 0.125rem 0.1875rem;
   text-align: center;
   text-shadow: 0 0 4px currentcolor;
   transform: translateX(-50%);
+  white-space: nowrap;
 }
 
 .satsman-pacman-host #blinky {
@@ -358,7 +306,7 @@
 }
 
 .satsman-pacman-host #blinky::after {
-  content: "$";
+  content: "Dollar";
 }
 
 .satsman-pacman-host #pinky {
@@ -366,7 +314,7 @@
 }
 
 .satsman-pacman-host #pinky::after {
-  content: "Ξ";
+  content: "Ether";
 }
 
 .satsman-pacman-host #inky {
@@ -374,7 +322,7 @@
 }
 
 .satsman-pacman-host #inky::after {
-  content: "₮";
+  content: "Tether";
 }
 
 .satsman-pacman-host #clyde {
@@ -382,13 +330,14 @@
 }
 
 .satsman-pacman-host #clyde::after {
-  content: "Ð";
+  content: "Doge";
 }
 
 @media (width >= 640px) {
-  .satsman-pacman-host .satsman-ghost-legend {
-    gap: 0.375rem;
-    font-size: 0.58rem;
+  .satsman-pacman-host .ghost::after {
+    top: -0.85rem;
+    font-size: 0.36rem;
+    padding: 0.15625rem 0.25rem;
   }
 }
 
