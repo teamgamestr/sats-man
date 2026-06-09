@@ -60,6 +60,29 @@ function loadScript(src: string): Promise<void> {
   });
 }
 
+function syncGameViewport(host: HTMLDivElement | null) {
+  if (!host) return;
+  const viewport = host.querySelector<HTMLElement>('#overflow-mask');
+  const gameUi = host.querySelector<HTMLElement>('#game-ui');
+  const maze = host.querySelector<HTMLElement>('#maze');
+  if (!viewport || !gameUi || !maze) return;
+
+  const gameWidth = Math.max(maze.offsetWidth, gameUi.offsetWidth, 1);
+  const gameHeight = Math.max(gameUi.offsetHeight, 1);
+  const viewportStyle = window.getComputedStyle(viewport);
+  const viewportWidth = Math.max(
+    viewport.clientWidth - parseFloat(viewportStyle.paddingLeft) - parseFloat(viewportStyle.paddingRight),
+    1,
+  );
+  const viewportHeight = Math.max(
+    viewport.clientHeight - parseFloat(viewportStyle.paddingTop) - parseFloat(viewportStyle.paddingBottom),
+    1,
+  );
+  const scale = Math.min(viewportWidth / gameWidth, viewportHeight / gameHeight);
+  host.style.setProperty('--satsman-game-width', `${gameWidth}px`);
+  host.style.setProperty('--satsman-game-scale', String(Math.max(0.1, scale)));
+}
+
 export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore, allTimeEntry, dailyEntry }: PacmanJsGameProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const coordinatorRef = useRef<PacmanCoordinator | null>(null);
@@ -77,6 +100,8 @@ export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore, all
     let cancelled = false;
     loadStylesheet('/pacman/build/app.css');
     const host = hostRef.current;
+    const handleResize = () => syncGameViewport(hostRef.current);
+    window.addEventListener('resize', handleResize);
 
     const handleGameOver = (event: Event) => {
       const detail = (event as CustomEvent<PacmanGameOverDetail>).detail;
@@ -98,6 +123,7 @@ export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore, all
           const startButton = document.getElementById('game-start') as HTMLButtonElement | null;
           if (startButton && !startButton.disabled) {
             startButton.click();
+            window.setTimeout(() => syncGameViewport(hostRef.current), 0);
           }
         }, 0);
       })
@@ -109,6 +135,7 @@ export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore, all
       cancelled = true;
       window.satsmanPacmanDestroyed = true;
       window.removeEventListener('satsman:pacman-game-over', handleGameOver);
+      window.removeEventListener('resize', handleResize);
       coordinatorRef.current?.destroy?.();
       coordinatorRef.current = null;
       const audioElements = host?.querySelectorAll('audio');
@@ -134,11 +161,11 @@ export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore, all
   }, [allTimeHighScore]);
 
   return (
-    <div className="min-h-screen bg-black pt-16 text-white">
+    <div className="min-h-screen bg-black pt-20 text-white">
       <SatsManHeader />
       <div ref={hostRef} className="satsman-pacman-host">
         <div id="overflow-mask" className="overflow-mask">
-          <div className="pointer-events-none absolute left-0 right-0 top-2 z-[3] px-3 text-center text-[0.55rem] sm:top-3 sm:text-[0.65rem]">
+          <div className="pointer-events-none absolute left-0 right-0 top-3 z-[3] px-3 text-center text-[0.55rem] sm:top-4 sm:text-[0.65rem]">
             <div className="mx-auto grid max-w-3xl grid-cols-3 gap-2 rounded-xl border-2 border-blue-700 bg-black/80 p-2 shadow-[0_0_28px_rgba(37,99,235,0.26)] backdrop-blur-sm">
               <HudScoreBlock label="Score" valueId="points-display" />
               <HudScoreBlock label="All Time High" value={allTimeHighScore} entry={allTimeEntry} />

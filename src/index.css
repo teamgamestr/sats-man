@@ -261,11 +261,42 @@
 }
 
 .satsman-pacman-host .overflow-mask {
-  height: calc(100vh - 4rem);
+  box-sizing: border-box;
+  height: calc(100svh - 5rem);
+  align-items: center;
+  padding: 5.25rem 0.75rem 0.75rem;
 }
 
 .satsman-pacman-host .loading-cover {
-  height: calc(100vh - 4rem);
+  height: calc(100svh - 5rem);
+}
+
+.satsman-pacman-host .game-ui {
+  height: auto;
+  transform: scale(var(--satsman-game-scale, 1));
+  transform-origin: center center;
+}
+
+.satsman-pacman-host .header-buttons {
+  top: 0.75rem;
+  right: 0.75rem;
+  left: auto;
+  width: auto;
+  padding: 0;
+}
+
+.satsman-pacman-host .header-buttons > span:first-child {
+  display: none;
+}
+
+@media (width >= 640px) {
+  .satsman-pacman-host .overflow-mask {
+    padding: 5rem 1rem 1rem;
+  }
+
+  .satsman-pacman-host .game-ui {
+    transform: scale(var(--satsman-game-scale, 1));
+  }
 }
 
 .satsman-pacman-host .loading-container,
