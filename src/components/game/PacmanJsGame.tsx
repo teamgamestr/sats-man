@@ -23,6 +23,8 @@ interface PacmanGameOverDetail {
   level?: number;
 }
 
+type GamepadDirection = 'up' | 'down' | 'left' | 'right';
+
 interface PacmanJsGameProps {
   onGameOver: (snapshot: { score: number; level: number }) => void;
   allTimeHighScore: number;
@@ -83,10 +85,44 @@ function syncGameViewport(host: HTMLDivElement | null) {
   host.style.setProperty('--satsman-game-scale', String(Math.max(0.1, scale)));
 }
 
+function dispatchGamepadKey(keyCode: number) {
+  window.dispatchEvent(new KeyboardEvent('keydown', { keyCode, which: keyCode, bubbles: true }));
+}
+
+function getGamepadDirection(gamepad: Gamepad): GamepadDirection | null {
+  const horizontal = gamepad.axes[0] ?? 0;
+  const vertical = gamepad.axes[1] ?? 0;
+  const threshold = 0.45;
+
+  if (gamepad.buttons[12]?.pressed || vertical < -threshold) return 'up';
+  if (gamepad.buttons[13]?.pressed || vertical > threshold) return 'down';
+  if (gamepad.buttons[14]?.pressed || horizontal < -threshold) return 'left';
+  if (gamepad.buttons[15]?.pressed || horizontal > threshold) return 'right';
+  return null;
+}
+
+function gamepadDirectionToKeyCode(direction: GamepadDirection): number {
+  switch (direction) {
+    case 'up':
+      return 38;
+    case 'down':
+      return 40;
+    case 'left':
+      return 37;
+    case 'right':
+      return 39;
+  }
+}
+
 export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore, allTimeEntry, dailyEntry }: PacmanJsGameProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const coordinatorRef = useRef<PacmanCoordinator | null>(null);
   const allTimeHighScoreRef = useRef(allTimeHighScore);
+  const gamepadStateRef = useRef<{ frameId: number; lastDirection: GamepadDirection | null; lastPausePressed: boolean }>({
+    frameId: 0,
+    lastDirection: null,
+    lastPausePressed: false,
+  });
 
   const endGame = useCallback((snapshot: { score: number; level: number }) => {
     window.satsmanPacmanDestroyed = true;
@@ -101,6 +137,7 @@ export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore, all
     loadStylesheet('/pacman/build/app.css');
     const host = hostRef.current;
     const handleResize = () => syncGameViewport(hostRef.current);
+    const gamepadState = gamepadStateRef.current;
     window.addEventListener('resize', handleResize);
 
     const handleGameOver = (event: Event) => {
@@ -108,6 +145,32 @@ export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore, all
       endGame({ score: Number(detail.score) || 0, level: Number(detail.level) || 1 });
     };
     window.addEventListener('satsman:pacman-game-over', handleGameOver);
+
+    const pollGamepads = () => {
+      const gamepads = navigator.getGamepads?.() ?? [];
+      const gamepad = Array.from(gamepads).find((pad) => pad?.connected);
+
+      if (gamepad) {
+        const direction = getGamepadDirection(gamepad);
+        if (direction && direction !== gamepadState.lastDirection) {
+          dispatchGamepadKey(gamepadDirectionToKeyCode(direction));
+        }
+        gamepadState.lastDirection = direction;
+
+        const pausePressed = Boolean(gamepad.buttons[9]?.pressed || gamepad.buttons[8]?.pressed);
+        if (pausePressed && !gamepadState.lastPausePressed) {
+          dispatchGamepadKey(27);
+        }
+        gamepadState.lastPausePressed = pausePressed;
+      } else {
+        gamepadState.lastDirection = null;
+        gamepadState.lastPausePressed = false;
+      }
+
+      gamepadState.frameId = window.requestAnimationFrame(pollGamepads);
+    };
+
+    gamepadState.frameId = window.requestAnimationFrame(pollGamepads);
 
     loadScript('/pacman/build/app.js')
       .then(() => {
@@ -136,6 +199,7 @@ export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore, all
       window.satsmanPacmanDestroyed = true;
       window.removeEventListener('satsman:pacman-game-over', handleGameOver);
       window.removeEventListener('resize', handleResize);
+      window.cancelAnimationFrame(gamepadState.frameId);
       coordinatorRef.current?.destroy?.();
       coordinatorRef.current = null;
       const audioElements = host?.querySelectorAll('audio');
