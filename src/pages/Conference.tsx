@@ -65,9 +65,6 @@ export default function Conference() {
         <div className="text-center">
           <img src="/sats-man-logo.png" alt="Sats-Man" className="mx-auto h-32 w-auto object-contain drop-shadow-[0_0_32px_rgba(250,204,21,0.55)] sm:h-40" />
           <p className="mt-2 text-sm font-black uppercase tracking-[0.35em] text-cyan-200">Conference Mode</p>
-          <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-cyan-50/75">
-            Pick a player identity, dodge bad money, and let the scoreboard roast everyone equally.
-          </p>
         </div>
 
         <section className="rounded-xl border-2 border-yellow-300/70 bg-yellow-300/10 p-3 shadow-[0_0_28px_rgba(250,204,21,0.14)]" aria-labelledby="conference-ghost-intro-title">
