@@ -199,7 +199,7 @@
   }
 
   .pacman-btn-cyan {
-    @apply border-cyan-300 text-cyan-200 shadow-[0_0_18px_rgba(34,211,238,0.14)] hover:border-cyan-100 hover:bg-cyan-300/15 hover:text-cyan-100 hover:shadow-[0_0_28px_rgba(34,211,238,0.30)] focus-visible:ring-cyan-300/50;
+    @apply border-cyan-300 text-cyan-200 shadow-[0_0_18px_rgba(34,211,238,0.14)] hover:border-cyan-100 hover:!bg-cyan-300 hover:!text-black hover:shadow-[0_0_28px_rgba(34,211,238,0.30)] focus-visible:ring-cyan-300/50;
   }
 
   .pacman-btn-pink {
