@@ -17,6 +17,26 @@ interface ScorePublishingOptions {
   bolt11?: string;
 }
 
+async function publishToRelays(nostr: ReturnType<typeof useNostr>['nostr'], event: NostrEvent, relays: string[]) {
+  const results = await Promise.allSettled(
+    relays.map(async (relay) => {
+      await nostr.relay(relay).event(event, { signal: AbortSignal.timeout(SCORE_PUBLISH_TIMEOUT_MS) });
+      return relay;
+    }),
+  );
+  const accepted = results.filter((result): result is PromiseFulfilledResult<string> => result.status === 'fulfilled');
+
+  if (accepted.length > 0) return;
+
+  const reasons = results.map((result, index) => {
+    if (result.status === 'fulfilled') return `${result.value}: accepted`;
+    const reason = result.reason instanceof Error ? result.reason.message : String(result.reason);
+    return `${relays[index]}: ${reason}`;
+  });
+
+  throw new Error(`Score publish failed (${reasons.join('; ')})`);
+}
+
 export function useScorePublishing() {
   const { nostr } = useNostr();
   const { user, effectivePubkey } = useCurrentUser();
@@ -39,10 +59,10 @@ export function useScorePublishing() {
 
     const data = await response.json() as { event: NostrEvent; relays?: string[] };
     if (data.relays?.length) {
-      await nostr.group(data.relays).event(data.event, { signal: AbortSignal.timeout(SCORE_PUBLISH_TIMEOUT_MS) });
+      await publishToRelays(nostr, data.event, data.relays);
     } else {
       await Promise.all([
-        nostr.event(data.event, { relays: SCORE_RELAYS, signal: AbortSignal.timeout(SCORE_PUBLISH_TIMEOUT_MS) }),
+        publishToRelays(nostr, data.event, SCORE_RELAYS),
         nostr.event(data.event, { signal: AbortSignal.timeout(SCORE_PUBLISH_TIMEOUT_MS) }),
       ]);
     }
