@@ -133,26 +133,18 @@ export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore, all
     }
   }, [allTimeHighScore]);
 
-  useEffect(() => {
-    const display = document.getElementById('high-score-display');
-    if (!display) return;
-
-    const renderRelayHighScore = () => {
-      display.innerText = String(allTimeHighScoreRef.current || '00');
-    };
-    const observer = new MutationObserver(renderRelayHighScore);
-
-    renderRelayHighScore();
-    observer.observe(display, { childList: true, characterData: true, subtree: true });
-
-    return () => observer.disconnect();
-  }, []);
-
   return (
     <div className="min-h-screen bg-black pt-16 text-white">
       <SatsManHeader />
       <div ref={hostRef} className="satsman-pacman-host">
         <div id="overflow-mask" className="overflow-mask">
+          <div className="pointer-events-none absolute left-0 right-0 top-2 z-[3] px-3 text-center text-[0.55rem] sm:top-3 sm:text-[0.65rem]">
+            <div className="mx-auto grid max-w-3xl grid-cols-3 gap-2 rounded-xl border-2 border-blue-700 bg-black/80 p-2 shadow-[0_0_28px_rgba(37,99,235,0.26)] backdrop-blur-sm">
+              <HudScoreBlock label="Score" valueId="points-display" />
+              <HudScoreBlock label="All Time High" value={allTimeHighScore} entry={allTimeEntry} />
+              <HudScoreBlock label="Daily High" value={dailyHighScore} entry={dailyEntry} />
+            </div>
+          </div>
           <div id="fps-display" className="fps-display" />
           <div id="preload-div" className="preload-div" />
 
@@ -181,20 +173,14 @@ export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore, all
           <div id="paused-text" className="paused-text">PAUSED</div>
 
           <div id="game-ui" className="game-ui">
-            <div id="row-top" className="row top" style={{ gap: 'clamp(1rem, 4vw, 3rem)', justifyContent: 'center', padding: '0 1rem' }}>
-              <div className="column" style={{ minWidth: '7rem', width: 'auto' }}>
-                <div style={{ textAlign: 'center' }}>SCORE</div>
-                <div id="points-display" style={{ marginRight: 0, textAlign: 'center' }} />
+            <div id="row-top" className="row top invisible h-0 overflow-hidden">
+              <div className="column _25">
+                <div>Score</div>
+                <div id="points-display-shadow" />
               </div>
-              <div className="column" style={{ minWidth: '9rem', width: 'auto' }}>
-                <div style={{ textAlign: 'center' }}>ALL TIME HIGH</div>
-                <div id="high-score-display" style={{ marginRight: 0, textAlign: 'center' }}>{allTimeHighScore || '00'}</div>
-                <HudScorer entry={allTimeEntry} />
-              </div>
-              <div className="column" style={{ minWidth: '7rem', width: 'auto' }}>
-                <div style={{ textAlign: 'center' }}>DAILY HIGH</div>
-                <div style={{ marginRight: 0, textAlign: 'center' }}>{dailyHighScore || '00'}</div>
-                <HudScorer entry={dailyEntry} />
+              <div className="column _50">
+                <div>High Score</div>
+                <div id="high-score-display" />
               </div>
             </div>
 
@@ -232,6 +218,18 @@ export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore, all
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function HudScoreBlock({ label, value, valueId, entry }: { label: string; value?: number; valueId?: string; entry?: HighScoreEntry }) {
+  return (
+    <div className="min-w-0 rounded-lg border border-cyan-300/40 bg-cyan-300/10 px-2 py-1">
+      <div className="truncate font-black uppercase tracking-widest text-cyan-300">{label}</div>
+      <div id={valueId} className="mt-1 text-sm font-black text-white sm:text-base">
+        {typeof value === 'number' ? (value || 0).toLocaleString() : '00'}
+      </div>
+      {entry && <HudScorer entry={entry} />}
     </div>
   );
 }
