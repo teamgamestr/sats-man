@@ -5,6 +5,8 @@ import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { gameConfig } from '@/config/gameConfig';
 
 const SCORE_RELAYS = ['wss://relay.gamestr.io'];
+const SCORE_SIGN_TIMEOUT_MS = 10_000;
+const SCORE_PUBLISH_TIMEOUT_MS = 8_000;
 
 interface ScorePublishingOptions {
   sessionId: string;
@@ -27,6 +29,7 @@ export function useScorePublishing() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...options, playerPubkey }),
+      signal: AbortSignal.timeout(SCORE_SIGN_TIMEOUT_MS),
     });
 
     if (!response.ok) {
@@ -36,10 +39,12 @@ export function useScorePublishing() {
 
     const data = await response.json() as { event: NostrEvent; relays?: string[] };
     if (data.relays?.length) {
-      await nostr.group(data.relays).event(data.event);
+      await nostr.group(data.relays).event(data.event, { signal: AbortSignal.timeout(SCORE_PUBLISH_TIMEOUT_MS) });
     } else {
-      await nostr.event(data.event, { relays: SCORE_RELAYS });
-      await nostr.event(data.event);
+      await Promise.all([
+        nostr.event(data.event, { relays: SCORE_RELAYS, signal: AbortSignal.timeout(SCORE_PUBLISH_TIMEOUT_MS) }),
+        nostr.event(data.event, { signal: AbortSignal.timeout(SCORE_PUBLISH_TIMEOUT_MS) }),
+      ]);
     }
     return data.event;
   }, [effectivePubkey, nostr, user]);
