@@ -72,7 +72,7 @@ export default function Conference() {
 
         <section className="rounded-xl border-2 border-yellow-300/70 bg-yellow-300/10 p-3 shadow-[0_0_28px_rgba(250,204,21,0.14)]" aria-labelledby="conference-ghost-intro-title">
           <h2 id="conference-ghost-intro-title" className="text-center text-sm font-black uppercase tracking-widest text-yellow-300">
-            Tonight's Enemies
+            Meet The Rebrand
           </h2>
           <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
             {ghostIntroductions.map((ghost) => (
