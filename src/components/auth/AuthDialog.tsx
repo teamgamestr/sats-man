@@ -462,6 +462,7 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
     connectStatus === 'getting-public-key' ||
     (isMobile && hasOpenedSigner)
   );
+  const showBackToWelcome = initialStep === 'welcome';
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -531,12 +532,14 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
                 </Button>
               )}
 
-              <button
-                onClick={() => setStep('welcome')}
-                className="text-sm font-black uppercase text-cyan-200 hover:text-yellow-300"
-              >
-                Back
-              </button>
+              {showBackToWelcome && (
+                <button
+                  onClick={() => setStep('welcome')}
+                  className="text-sm font-black uppercase text-cyan-200 hover:text-yellow-300"
+                >
+                  Back
+                </button>
+              )}
             </div>
           )}
 
@@ -751,12 +754,14 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
                 </>
               )}
 
-              <button
-                onClick={() => setStep('welcome')}
-                 className="w-full text-sm font-black uppercase text-cyan-200 hover:text-yellow-300"
-              >
-                Back
-              </button>
+              {showBackToWelcome && (
+                <button
+                  onClick={() => setStep('welcome')}
+                  className="w-full text-sm font-black uppercase text-cyan-200 hover:text-yellow-300"
+                >
+                  Back
+                </button>
+              )}
             </div>
           )}
 
