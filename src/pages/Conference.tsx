@@ -8,11 +8,13 @@ import AuthDialog from '@/components/auth/AuthDialog';
 import { SatsManGame } from '@/components/game/SatsManGame';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useLoginActions } from '@/hooks/useLoginActions';
+import { useProfileSearch } from '@/hooks/useProfileSearch';
 
 export default function Conference() {
   const { user } = useCurrentUser();
   const login = useLoginActions();
   const [nip05, setNip05] = useState('');
+  const profileSearch = useProfileSearch(nip05);
   const [error, setError] = useState('');
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
 
@@ -75,7 +77,44 @@ export default function Conference() {
             <Mail className="mx-auto h-10 w-10 text-cyan-300" />
             <h2 className="text-xl font-black uppercase tracking-widest text-cyan-300">NIP-05 Login</h2>
             <p className="text-sm text-cyan-50/80">Enter your Nostr address to link scores to your identity without needing to sign.</p>
-            <Input value={nip05} onChange={(event) => setNip05(event.target.value)} placeholder="name@example.com" className="h-12 border-2 border-cyan-300 bg-black text-center text-cyan-100 placeholder:text-cyan-100/35" />
+            <div className="space-y-2">
+              <Input
+                value={nip05}
+                onChange={(event) => {
+                  setNip05(event.target.value);
+                  if (error) setError('');
+                }}
+                placeholder="name@example.com"
+                className="h-12 border-2 border-cyan-300 bg-black text-center text-cyan-100 placeholder:text-cyan-100/35"
+              />
+              {profileSearch.canSearch && (
+                <div className="overflow-hidden rounded-lg border border-cyan-300/45 bg-black/90 text-left shadow-[0_0_24px_rgba(34,211,238,0.14)]">
+                  {profileSearch.isLoading ? (
+                    <div className="px-3 py-2 text-xs font-black uppercase tracking-widest text-cyan-100/55">Searching profiles...</div>
+                  ) : profileSearch.data && profileSearch.data.length > 0 ? (
+                    profileSearch.data.map(({ pubkey, metadata }) => {
+                      const displayName = metadata.display_name || metadata.name || metadata.nip05 || pubkey.slice(0, 8);
+                      return (
+                        <button
+                          key={pubkey}
+                          type="button"
+                          onClick={() => {
+                            setNip05(metadata.nip05 ?? '');
+                            setError('');
+                          }}
+                          className="block w-full border-b border-cyan-300/15 px-3 py-2 text-left transition-colors last:border-b-0 hover:bg-cyan-300/10 focus-visible:bg-cyan-300/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300"
+                        >
+                          <div className="truncate text-sm font-black text-cyan-200">{displayName}</div>
+                          <div className="truncate text-xs text-cyan-50/60">{metadata.nip05}</div>
+                        </button>
+                      );
+                    })
+                  ) : (
+                    <div className="px-3 py-2 text-xs text-cyan-50/50">No profile suggestions found. Enter a full NIP-05 address.</div>
+                  )}
+                </div>
+              )}
+            </div>
             <Button className="pacman-btn pacman-btn-cyan h-14 w-full text-lg" onClick={handleNip05Login}>Login With NIP-05</Button>
           </CardContent>
         </Card>
