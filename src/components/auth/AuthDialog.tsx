@@ -84,6 +84,18 @@ function downloadNsecFile(nsec: string) {
 }
 
 const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 'welcome' }) => {
+  const login = useLoginActions();
+  const [initialConnectSession] = useState(() => {
+    if (initialStep !== 'connect') return { params: null, uri: '' };
+
+    const params = generateNostrConnectParams(login.getRelayUrls());
+    return {
+      params,
+      uri: generateNostrConnectURI(params, {
+        callback: isMobileDevice() ? `${window.location.origin}/remoteloginsuccess` : undefined,
+      }),
+    };
+  });
   const [step, setStep] = useState<Step>(initialStep);
 
   // Signup state
@@ -99,8 +111,8 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
   const [showMoreOptions, setShowMoreOptions] = useState(false);
 
   // Nostrconnect / bunker state
-  const [nostrConnectParams, setNostrConnectParams] = useState<NostrConnectParams | null>(null);
-  const [nostrConnectUri, setNostrConnectUri] = useState('');
+  const [nostrConnectParams, setNostrConnectParams] = useState<NostrConnectParams | null>(initialConnectSession.params);
+  const [nostrConnectUri, setNostrConnectUri] = useState(initialConnectSession.uri);
   const [connectError, setConnectError] = useState<string | null>(null);
   // Progress status for the nostrconnect handshake. `null` means the user
   // hasn't kicked off the handshake yet (or they canceled) — we show the QR
@@ -117,7 +129,6 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
   const [showBunkerInput, setShowBunkerInput] = useState(false);
   const [bunkerUri, setBunkerUri] = useState('');
 
-  const login = useLoginActions();
   // Stable refs so the nostrconnect listening effect below doesn't restart on
   // every parent render. Parents typically pass inline arrow functions for
   // onClose, and useLoginActions returns a fresh object each render — without

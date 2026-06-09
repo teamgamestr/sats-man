@@ -4,21 +4,17 @@ import { Mail, QrCode, UserX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { QRCodeCanvas } from '@/components/ui/qrcode';
+import AuthDialog from '@/components/auth/AuthDialog';
 import { SatsManGame } from '@/components/game/SatsManGame';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
-import { useLoginActions, generateNostrConnectParams, generateNostrConnectURI, type NostrConnectParams } from '@/hooks/useLoginActions';
+import { useLoginActions } from '@/hooks/useLoginActions';
 
 export default function Conference() {
   const { user } = useCurrentUser();
   const login = useLoginActions();
   const [nip05, setNip05] = useState('');
   const [error, setError] = useState('');
-  const [qrOpen, setQrOpen] = useState(false);
-  const [connectParams, setConnectParams] = useState<NostrConnectParams | null>(null);
-  const [connectUri, setConnectUri] = useState('');
-  const [isConnecting, setIsConnecting] = useState(false);
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
 
   useSeoMeta({
     title: 'Sats-Man Conference Mode',
@@ -26,17 +22,9 @@ export default function Conference() {
   });
 
   const startQrLogin = useCallback(() => {
-    const params = generateNostrConnectParams(login.getRelayUrls());
-    setConnectParams(params);
-    setConnectUri(generateNostrConnectURI(params));
-    setQrOpen(true);
-    setIsConnecting(true);
     sessionStorage.setItem('satsman_session_origin', '/conference');
-    login.nostrconnect(params)
-      .then(() => setQrOpen(false))
-      .catch((err: unknown) => setError(err instanceof Error ? err.message : 'Remote signer login failed.'))
-      .finally(() => setIsConnecting(false));
-  }, [login]);
+    setAuthDialogOpen(true);
+  }, []);
 
   const handleNip05Login = useCallback(async () => {
     const normalized = nip05.trim().toLowerCase();
@@ -104,15 +92,13 @@ export default function Conference() {
         {error && <div className="rounded border border-red-500 bg-red-950/40 p-3 text-center text-sm text-red-200">{error}</div>}
       </div>
 
-      <Dialog open={qrOpen} onOpenChange={setQrOpen}>
-        <DialogContent className="border-4 border-yellow-300 bg-black text-white sm:max-w-md">
-          <DialogHeader><DialogTitle className="text-center text-yellow-300">QR Code Login</DialogTitle></DialogHeader>
-          <div className="flex flex-col items-center gap-4">
-            {connectUri && <div className="rounded bg-white p-4"><QRCodeCanvas value={connectUri} size={300} /></div>}
-            <p className="text-center text-sm text-yellow-50/80">{isConnecting && connectParams ? 'Waiting for signer approval...' : 'Use Amber, nsec.app, or any NIP-46 compatible signer.'}</p>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {authDialogOpen && (
+        <AuthDialog
+          isOpen={authDialogOpen}
+          initialStep="connect"
+          onClose={() => setAuthDialogOpen(false)}
+        />
+      )}
     </div>
   );
 }
