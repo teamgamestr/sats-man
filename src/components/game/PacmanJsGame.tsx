@@ -128,6 +128,21 @@ export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore }: P
     }
   }, [allTimeHighScore]);
 
+  useEffect(() => {
+    const display = document.getElementById('high-score-display');
+    if (!display) return;
+
+    const renderRelayHighScore = () => {
+      display.innerText = String(allTimeHighScoreRef.current || '00');
+    };
+    const observer = new MutationObserver(renderRelayHighScore);
+
+    renderRelayHighScore();
+    observer.observe(display, { childList: true, characterData: true, subtree: true });
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="min-h-screen bg-black pt-16 text-white">
       <SatsManHeader />
