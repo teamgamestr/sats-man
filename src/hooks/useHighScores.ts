@@ -84,10 +84,17 @@ export function formatPlayerPubkey(pubkey: string): string {
   }
 }
 
+function generatedPlayerName(pubkey: string): string {
+  const adjectives = ['Neon', 'Turbo', 'Cosmic', 'Zap', 'Pixel', 'Arcade', 'Lightning', 'Retro'];
+  const mascots = ['Chomper', 'Ghost', 'Gobbler', 'Waka', 'Pellet', 'Maze', 'Blinky', 'Sats'];
+  const seed = pubkey.match(/.{1,8}/g)?.reduce((total, part) => total + Number.parseInt(part, 16), 0) ?? 0;
+  return `${adjectives[seed % adjectives.length]} ${mascots[Math.floor(seed / adjectives.length) % mascots.length]}`;
+}
+
 export function getHighScoreDisplayName(entry: HighScoreEntry | HighScoreProfile | undefined): string {
   if (!entry) return 'No scorer yet';
   const pubkey = 'playerPubkey' in entry ? entry.playerPubkey : entry.pubkey;
-  return entry.metadata?.display_name || entry.metadata?.name || entry.metadata?.nip05 || formatPlayerPubkey(pubkey);
+  return entry.metadata?.display_name || entry.metadata?.name || entry.metadata?.nip05 || generatedPlayerName(pubkey);
 }
 
 export function getHighScorePicture(entry: HighScoreEntry | HighScoreProfile | undefined): string | undefined {
