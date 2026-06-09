@@ -215,7 +215,9 @@ export function PaymentGate({ onStart, leaderboard, allTimeEntry, dailyEntry, al
             {ghostIntroductions.map((ghost) => (
               <div key={ghost.alias} className={`rounded-lg border bg-black/70 p-3 ${ghost.color}`}>
                 <div className="flex items-center gap-3">
-                  <img src={ghost.image} alt={`${ghost.original} ghost`} className="h-8 w-16 shrink-0 object-contain [image-rendering:pixelated]" />
+                  <span className="h-8 w-8 shrink-0 overflow-hidden" aria-hidden="true">
+                    <img src={ghost.image} alt="" className="h-8 w-16 max-w-none object-contain [image-rendering:pixelated]" />
+                  </span>
                   <div className="flex min-w-0 flex-1 items-center justify-between gap-2 text-xs font-black uppercase tracking-widest">
                     <span className="text-white/45 line-through decoration-2">{ghost.original}</span>
                     <span className="text-yellow-300">{ghost.alias}</span>
