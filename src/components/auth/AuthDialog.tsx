@@ -704,7 +704,7 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
                   <Button
                     variant="outline"
                     onClick={goToConnect}
-                    className="pacman-btn pacman-btn-yellow h-12 w-full hover:!bg-yellow-300 hover:!text-black"
+                    className="pacman-btn pacman-btn-yellow h-12 w-full"
                   >
                     Use remote signer
                   </Button>
@@ -747,7 +747,7 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
                   <Button
                     variant="outline"
                     onClick={goToConnect}
-                    className="pacman-btn pacman-btn-yellow w-full hover:!bg-yellow-300 hover:!text-black"
+                    className="pacman-btn pacman-btn-yellow w-full"
                   >
                     Use remote signer
                   </Button>
