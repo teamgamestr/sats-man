@@ -145,13 +145,12 @@ export function PaymentGate({ onStart }: PaymentGateProps) {
           <div className="rounded-xl border-4 border-cyan-300 bg-white p-4 shadow-[0_0_30px_rgba(34,211,238,0.22)]">
             {qrCodeDataUrl ? <img src={qrCodeDataUrl} alt="Lightning invoice QR" className="mx-auto" /> : null}
           </div>
-          <Button className="pacman-btn pacman-btn-cyan h-12 w-full" variant="outline" onClick={() => void navigator.clipboard.writeText(invoice)}>
+          <Button className="pacman-btn pacman-btn-cyan h-12 w-full hover:!bg-cyan-300 hover:!text-black" variant="outline" onClick={() => void navigator.clipboard.writeText(invoice)}>
             <Copy className="mr-2 h-4 w-4" /> Copy Invoice
           </Button>
           <div className="flex items-center justify-center gap-2 rounded-lg border-2 border-yellow-300 bg-yellow-300/10 p-3 text-sm font-black uppercase tracking-wider text-yellow-100 shadow-[0_0_20px_rgba(250,204,21,0.14)]">
             <Loader2 className="h-4 w-4 animate-spin" /> Waiting for zap receipt
           </div>
-          {status && <p className="rounded border border-cyan-300/40 bg-cyan-300/10 p-3 text-center text-sm text-cyan-50">{status}</p>}
         </CardContent>
       </Card>
     );
