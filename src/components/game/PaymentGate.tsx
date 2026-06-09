@@ -163,13 +163,24 @@ export function PaymentGate({ onStart }: PaymentGateProps) {
           <div className="space-y-4 text-center">
             <div className="grid gap-3 sm:grid-cols-3">
               <Button className="pacman-btn pacman-btn-cyan h-16 text-lg" onClick={() => openAuth('login')}>
-                Login + <Play className="ml-2 h-5 w-5" />
+                <span className="inline-flex items-center gap-2">
+                  <span>Login</span>
+                  <span>+</span>
+                  <Play className="h-5 w-5" />
+                </span>
               </Button>
               <Button className="pacman-btn pacman-btn-pink h-16 text-lg" onClick={() => openAuth('generate')}>
-                Sign-up + <Play className="ml-2 h-5 w-5" />
+                <span className="inline-flex items-center gap-2">
+                  <span>Sign-up</span>
+                  <span>+</span>
+                  <Play className="h-5 w-5" />
+                </span>
               </Button>
               <Button className="pacman-btn pacman-btn-orange h-16 text-lg" onClick={handleAnonymous}>
-                Anon <Play className="ml-2 h-5 w-5" />
+                <span className="inline-flex items-center gap-2">
+                  <span>Anon</span>
+                  <Play className="h-5 w-5" />
+                </span>
               </Button>
             </div>
             <p className="mx-auto max-w-md text-sm leading-relaxed text-cyan-50/75">
