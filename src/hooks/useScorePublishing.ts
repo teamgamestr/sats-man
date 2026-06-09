@@ -37,6 +37,24 @@ async function publishToRelays(nostr: ReturnType<typeof useNostr>['nostr'], even
   throw new Error(`Score publish failed (${reasons.join('; ')})`);
 }
 
+async function publishProductionScore(nostr: ReturnType<typeof useNostr>['nostr'], event: NostrEvent) {
+  const results = await Promise.allSettled([
+    publishToRelays(nostr, event, SCORE_RELAYS),
+    nostr.event(event, { signal: AbortSignal.timeout(SCORE_PUBLISH_TIMEOUT_MS) }),
+  ]);
+
+  if (results.some((result) => result.status === 'fulfilled')) return;
+
+  const reasons = results.map((result, index) => {
+    if (result.status === 'fulfilled') return index === 0 ? 'score relays: accepted' : 'profile relays: accepted';
+    const label = index === 0 ? 'score relays' : 'profile relays';
+    const reason = result.reason instanceof Error ? result.reason.message : String(result.reason);
+    return `${label}: ${reason}`;
+  });
+
+  throw new Error(`Score publish failed (${reasons.join('; ')})`);
+}
+
 export function useScorePublishing() {
   const { nostr } = useNostr();
   const { user, effectivePubkey } = useCurrentUser();
@@ -61,10 +79,7 @@ export function useScorePublishing() {
     if (data.relays?.length) {
       await publishToRelays(nostr, data.event, data.relays);
     } else {
-      await Promise.all([
-        publishToRelays(nostr, data.event, SCORE_RELAYS),
-        nostr.event(data.event, { signal: AbortSignal.timeout(SCORE_PUBLISH_TIMEOUT_MS) }),
-      ]);
+      await publishProductionScore(nostr, data.event);
     }
     return data.event;
   }, [effectivePubkey, nostr, user]);
