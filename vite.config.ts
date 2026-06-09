@@ -7,7 +7,9 @@ import "dotenv/config";
 import { hexToBytes } from "@noble/hashes/utils";
 import { finalizeEvent, nip19 } from "nostr-tools";
 import { defineConfig } from "vitest/config";
-import { gameConfig } from "./src/config/gameConfig";
+
+const SCORE_TEST_MODE = process.env.SATSMAN_TEST_MODE !== "false";
+const SCORE_TEST_RELAYS = ["wss://test.gamestr.io"];
 
 function getSignerKey() {
   const raw = process.env.SATSMAN_NSEC;
@@ -65,7 +67,7 @@ async function handleSignScore(req: IncomingMessage, res: ServerResponse) {
       ["genre", "retro"],
       ["alt", `Game score: ${score} in Sats-Man`],
     ];
-    if (gameConfig.testMode) tags.push(["mode", "test"]);
+    if (SCORE_TEST_MODE) tags.push(["mode", "test"]);
     if (typeof paymentReceiptId === "string" && /^[0-9a-f]{64}$/i.test(paymentReceiptId)) tags.push(["e", paymentReceiptId, "", "zap-receipt"]);
     if (typeof bolt11 === "string" && bolt11.length < 4096) tags.push(["bolt11", bolt11]);
 
@@ -78,7 +80,7 @@ async function handleSignScore(req: IncomingMessage, res: ServerResponse) {
 
     sendJson(res, 200, {
       event,
-      relays: gameConfig.testMode ? gameConfig.testModeRelays : undefined,
+      relays: SCORE_TEST_MODE ? SCORE_TEST_RELAYS : undefined,
     });
   } catch (error) {
     sendJson(res, 500, { error: error instanceof Error ? error.message : "Failed to sign score" });
