@@ -31,6 +31,13 @@ interface PacmanJsGameProps {
   dailyEntry?: HighScoreEntry;
 }
 
+const ghostLegends = [
+  { name: 'Dollar', symbol: '$', className: 'satsman-ghost-dollar' },
+  { name: 'Ether', symbol: 'Ξ', className: 'satsman-ghost-ether' },
+  { name: 'Tether', symbol: '₮', className: 'satsman-ghost-tether' },
+  { name: 'Doge', symbol: 'Ð', className: 'satsman-ghost-doge' },
+];
+
 function loadStylesheet(href: string): HTMLLinkElement {
   const existing = document.querySelector<HTMLLinkElement>(`link[href="${href}"]`);
   if (existing) return existing;
@@ -144,6 +151,14 @@ export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore, all
               <HudScoreBlock label="All Time High" value={allTimeHighScore} entry={allTimeEntry} />
               <HudScoreBlock label="Daily High" value={dailyHighScore} entry={dailyEntry} />
             </div>
+            <div className="satsman-ghost-legend" aria-label="Enemy legend">
+              {ghostLegends.map((ghost) => (
+                <span key={ghost.name} className={`satsman-ghost-legend-item ${ghost.className}`}>
+                  <span className="satsman-ghost-legend-symbol" aria-hidden="true">{ghost.symbol}</span>
+                  {ghost.name}
+                </span>
+              ))}
+            </div>
           </div>
           <div id="fps-display" className="fps-display" />
           <div id="preload-div" className="preload-div" />
@@ -190,10 +205,10 @@ export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore, all
               <div id="dot-container" />
               <p id="pacman" className="pacman" />
               <p id="pacman-arrow" className="pacman" />
-              <p id="clyde" className="ghost" />
-              <p id="inky" className="ghost" />
-              <p id="pinky" className="ghost" />
-              <p id="blinky" className="ghost" />
+              <p id="clyde" className="ghost" role="img" aria-label="Doge ghost" />
+              <p id="inky" className="ghost" role="img" aria-label="Tether ghost" />
+              <p id="pinky" className="ghost" role="img" aria-label="Ether ghost" />
+              <p id="blinky" className="ghost" role="img" aria-label="Dollar ghost" />
             </div>
 
             <div id="bottom-row" className="row bottom">
