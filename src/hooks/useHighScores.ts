@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNostr } from '@nostrify/react';
-import type { NostrEvent } from '@nostrify/nostrify';
+import { NSchema as n, type NostrEvent, type NostrMetadata } from '@nostrify/nostrify';
 import { nip19 } from 'nostr-tools';
 import { gameConfig } from '@/config/gameConfig';
 
@@ -13,6 +13,12 @@ export interface HighScoreEntry {
   score: number;
   createdAt: number;
   event: NostrEvent;
+  metadata?: NostrMetadata;
+}
+
+export interface HighScoreProfile {
+  pubkey: string;
+  metadata?: NostrMetadata;
 }
 
 function getTag(event: NostrEvent, name: string): string | undefined {
@@ -49,6 +55,21 @@ function highestPerPlayer(entries: HighScoreEntry[]) {
   return [...bestByPlayer.values()].sort((a, b) => b.score - a.score || b.createdAt - a.createdAt);
 }
 
+function parseMetadata(event: NostrEvent): NostrMetadata | undefined {
+  try {
+    return n.json().pipe(n.metadata()).parse(event.content);
+  } catch {
+    return undefined;
+  }
+}
+
+function withMetadata(entries: HighScoreEntry[], profiles: Map<string, NostrMetadata | undefined>) {
+  return entries.map((entry) => ({
+    ...entry,
+    metadata: profiles.get(entry.playerPubkey),
+  }));
+}
+
 function startOfToday() {
   const now = new Date();
   return Math.floor(new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000);
@@ -63,6 +84,16 @@ export function formatPlayerPubkey(pubkey: string): string {
   }
 }
 
+export function getHighScoreDisplayName(entry: HighScoreEntry | HighScoreProfile | undefined): string {
+  if (!entry) return 'No scorer yet';
+  const pubkey = 'playerPubkey' in entry ? entry.playerPubkey : entry.pubkey;
+  return entry.metadata?.display_name || entry.metadata?.name || entry.metadata?.nip05 || formatPlayerPubkey(pubkey);
+}
+
+export function getHighScorePicture(entry: HighScoreEntry | HighScoreProfile | undefined): string | undefined {
+  return entry?.metadata?.picture;
+}
+
 export function useHighScores() {
   const { nostr } = useNostr();
 
@@ -75,24 +106,50 @@ export function useHighScores() {
         { signal: AbortSignal.any([signal, AbortSignal.timeout(6000)]) },
       );
 
-      return events
+      const entries = events
         .map(parseScoreEvent)
         .filter((entry): entry is HighScoreEntry => Boolean(entry));
+
+      const ranked = highestPerPlayer(entries);
+      const today = startOfToday();
+      const dailyRanked = highestPerPlayer(entries.filter((entry) => entry.createdAt >= today));
+      const profilePubkeys = Array.from(new Set([
+        ...ranked.slice(0, 5).map((entry) => entry.playerPubkey),
+        ...(ranked[0] ? [ranked[0].playerPubkey] : []),
+        ...(dailyRanked[0] ? [dailyRanked[0].playerPubkey] : []),
+      ]));
+
+      const profileEvents = profilePubkeys.length > 0
+        ? await nostr.query(
+          [{ kinds: [0], authors: profilePubkeys, limit: profilePubkeys.length }],
+          { signal: AbortSignal.any([signal, AbortSignal.timeout(2500)]) },
+        )
+        : [];
+      const profiles = new Map(profileEvents.map((event) => [event.pubkey, parseMetadata(event)]));
+
+      return {
+        entries: withMetadata(entries, profiles),
+        leaderboard: withMetadata(ranked.slice(0, 5), profiles),
+        allTimeEntry: ranked[0] ? withMetadata([ranked[0]], profiles)[0] : undefined,
+        dailyEntry: dailyRanked[0] ? withMetadata([dailyRanked[0]], profiles)[0] : undefined,
+      };
     },
   });
 
   return useMemo(() => {
-    const entries = query.data ?? [];
-    const ranked = highestPerPlayer(entries);
-    const today = startOfToday();
-    const dailyRanked = highestPerPlayer(entries.filter((entry) => entry.createdAt >= today));
+    const entries = query.data?.entries ?? [];
+    const leaderboard = query.data?.leaderboard ?? [];
+    const allTimeEntry = query.data?.allTimeEntry;
+    const dailyEntry = query.data?.dailyEntry;
 
     return {
       ...query,
       entries,
-      leaderboard: ranked.slice(0, 5),
-      allTimeHigh: ranked[0]?.score ?? 0,
-      dailyHigh: dailyRanked[0]?.score ?? 0,
+      leaderboard,
+      allTimeEntry,
+      dailyEntry,
+      allTimeHigh: allTimeEntry?.score ?? 0,
+      dailyHigh: dailyEntry?.score ?? 0,
       relays: SCORE_RELAYS,
     };
   }, [query]);

@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { SatsManHeader } from '@/components/game/SatsManHeader';
+import type { HighScoreEntry } from '@/hooks/useHighScores';
+import { getHighScoreDisplayName, getHighScorePicture } from '@/hooks/useHighScores';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 declare global {
   interface Window {
@@ -24,6 +27,8 @@ interface PacmanJsGameProps {
   onGameOver: (snapshot: { score: number; level: number }) => void;
   allTimeHighScore: number;
   dailyHighScore: number;
+  allTimeEntry?: HighScoreEntry;
+  dailyEntry?: HighScoreEntry;
 }
 
 function loadStylesheet(href: string): HTMLLinkElement {
@@ -55,7 +60,7 @@ function loadScript(src: string): Promise<void> {
   });
 }
 
-export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore }: PacmanJsGameProps) {
+export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore, allTimeEntry, dailyEntry }: PacmanJsGameProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const coordinatorRef = useRef<PacmanCoordinator | null>(null);
   const allTimeHighScoreRef = useRef(allTimeHighScore);
@@ -184,10 +189,12 @@ export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore }: P
               <div className="column" style={{ minWidth: '9rem', width: 'auto' }}>
                 <div style={{ textAlign: 'center' }}>ALL TIME HIGH</div>
                 <div id="high-score-display" style={{ marginRight: 0, textAlign: 'center' }}>{allTimeHighScore || '00'}</div>
+                <HudScorer entry={allTimeEntry} />
               </div>
               <div className="column" style={{ minWidth: '7rem', width: 'auto' }}>
                 <div style={{ textAlign: 'center' }}>DAILY HIGH</div>
                 <div style={{ marginRight: 0, textAlign: 'center' }}>{dailyHighScore || '00'}</div>
+                <HudScorer entry={dailyEntry} />
               </div>
             </div>
 
@@ -225,6 +232,23 @@ export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore }: P
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function HudScorer({ entry }: { entry?: HighScoreEntry }) {
+  const name = getHighScoreDisplayName(entry);
+  const picture = getHighScorePicture(entry);
+
+  return (
+    <div className="mt-1 flex min-w-0 items-center justify-center gap-1 text-[0.55rem] text-cyan-100">
+      <Avatar size="sm" className="size-5 border border-cyan-300 bg-black">
+        <AvatarImage src={picture} alt={name} />
+        <AvatarFallback className="bg-black text-[0.5rem] font-black text-cyan-200">
+          {name.charAt(0).toUpperCase()}
+        </AvatarFallback>
+      </Avatar>
+      <span className="max-w-24 truncate">{name}</span>
     </div>
   );
 }

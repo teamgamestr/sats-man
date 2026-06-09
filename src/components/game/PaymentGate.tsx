@@ -12,7 +12,8 @@ import { useZaps } from '@/hooks/useZaps';
 import { gameConfig } from '@/config/gameConfig';
 import { unlockPacmanAudio } from '@/lib/pacmanAudio';
 import type { HighScoreEntry } from '@/hooks/useHighScores';
-import { formatPlayerPubkey } from '@/hooks/useHighScores';
+import { getHighScoreDisplayName, getHighScorePicture } from '@/hooks/useHighScores';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export interface PaymentSession {
   sessionId: string;
@@ -24,12 +25,14 @@ export interface PaymentSession {
 interface PaymentGateProps {
   onStart: (session: PaymentSession) => void;
   leaderboard: HighScoreEntry[];
+  allTimeEntry?: HighScoreEntry;
+  dailyEntry?: HighScoreEntry;
   allTimeHigh: number;
   dailyHigh: number;
   isLoadingHighScores: boolean;
 }
 
-export function PaymentGate({ onStart, leaderboard, allTimeHigh, dailyHigh, isLoadingHighScores }: PaymentGateProps) {
+export function PaymentGate({ onStart, leaderboard, allTimeEntry, dailyEntry, allTimeHigh, dailyHigh, isLoadingHighScores }: PaymentGateProps) {
   const { user } = useCurrentUser();
   const login = useLoginActions();
   const { webln, activeNWC } = useWallet();
@@ -233,14 +236,16 @@ export function PaymentGate({ onStart, leaderboard, allTimeHigh, dailyHigh, isLo
       </CardContent>
       <CardContent className="relative border-t-2 border-blue-700/70 pt-5">
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3 text-center">
-            <div className="rounded-lg border-2 border-yellow-300 bg-yellow-300/10 p-3 shadow-[0_0_18px_rgba(250,204,21,0.12)]">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-lg border-2 border-yellow-300 bg-yellow-300/10 p-3 text-center shadow-[0_0_18px_rgba(250,204,21,0.12)]">
               <div className="text-xs font-black uppercase tracking-widest text-yellow-300">All Time High</div>
               <div className="mt-1 text-2xl font-black text-white">{allTimeHigh.toLocaleString()}</div>
+              <HighScoreIdentity entry={allTimeEntry} className="mt-2 justify-center" />
             </div>
-            <div className="rounded-lg border-2 border-cyan-300 bg-cyan-300/10 p-3 shadow-[0_0_18px_rgba(34,211,238,0.12)]">
+            <div className="rounded-lg border-2 border-cyan-300 bg-cyan-300/10 p-3 text-center shadow-[0_0_18px_rgba(34,211,238,0.12)]">
               <div className="text-xs font-black uppercase tracking-widest text-cyan-300">Daily High</div>
               <div className="mt-1 text-2xl font-black text-white">{dailyHigh.toLocaleString()}</div>
+              <HighScoreIdentity entry={dailyEntry} className="mt-2 justify-center" />
             </div>
           </div>
           <div className="rounded-xl border-2 border-pink-400 bg-black/80 p-3 shadow-[0_0_24px_rgba(244,114,182,0.12)]">
@@ -252,7 +257,7 @@ export function PaymentGate({ onStart, leaderboard, allTimeHigh, dailyHigh, isLo
                 {leaderboard.map((entry, index) => (
                   <div key={entry.id} className="grid grid-cols-[2rem_1fr_auto] items-center gap-2 rounded border border-blue-700/70 bg-blue-950/25 px-2 py-1.5 text-sm">
                     <div className="font-black text-yellow-300">#{index + 1}</div>
-                    <div className="truncate text-cyan-100">{formatPlayerPubkey(entry.playerPubkey)}</div>
+                    <HighScoreIdentity entry={entry} />
                     <div className="font-black text-white">{entry.score.toLocaleString()}</div>
                   </div>
                 ))}
@@ -264,5 +269,22 @@ export function PaymentGate({ onStart, leaderboard, allTimeHigh, dailyHigh, isLo
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+function HighScoreIdentity({ entry, className = '' }: { entry?: HighScoreEntry; className?: string }) {
+  const name = getHighScoreDisplayName(entry);
+  const picture = getHighScorePicture(entry);
+
+  return (
+    <div className={`flex min-w-0 items-center gap-2 ${className}`}>
+      <Avatar size="sm" className="border border-cyan-300 bg-black">
+        <AvatarImage src={picture} alt={name} />
+        <AvatarFallback className="bg-black text-xs font-black text-cyan-200">
+          {name.charAt(0).toUpperCase()}
+        </AvatarFallback>
+      </Avatar>
+      <span className="truncate text-xs font-black text-cyan-100">{name}</span>
+    </div>
   );
 }

@@ -95,6 +95,8 @@ export function SatsManGame() {
         <PaymentGate
           onStart={handleStart}
           leaderboard={highScores.leaderboard}
+          allTimeEntry={highScores.allTimeEntry}
+          dailyEntry={highScores.dailyEntry}
           allTimeHigh={highScores.allTimeHigh}
           dailyHigh={highScores.dailyHigh}
           isLoadingHighScores={highScores.isLoading}
@@ -165,5 +167,13 @@ export function SatsManGame() {
     );
   }
 
-  return <PacmanJsGame onGameOver={handleGameOver} allTimeHighScore={highScores.allTimeHigh} dailyHighScore={highScores.dailyHigh} />;
+  return (
+    <PacmanJsGame
+      onGameOver={handleGameOver}
+      allTimeHighScore={highScores.allTimeHigh}
+      dailyHighScore={highScores.dailyHigh}
+      allTimeEntry={highScores.allTimeEntry}
+      dailyEntry={highScores.dailyEntry}
+    />
+  );
 }
