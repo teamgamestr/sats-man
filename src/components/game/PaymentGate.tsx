@@ -12,39 +12,8 @@ import { useZaps } from '@/hooks/useZaps';
 import { gameConfig } from '@/config/gameConfig';
 import { unlockPacmanAudio } from '@/lib/pacmanAudio';
 import type { HighScoreEntry } from '@/hooks/useHighScores';
-import { getHighScoreDisplayName, getHighScorePicture } from '@/hooks/useHighScores';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-
-const ghostIntroductions = [
-  {
-    original: 'Blinky',
-    alias: 'Dollar',
-    image: '/pacman/app/style/graphics/spriteSheets/characters/ghosts/blinky/blinky_right.svg',
-    color: 'border-red-500/70 text-red-200 shadow-[0_0_18px_rgba(248,113,113,0.14)]',
-    copy: 'Still chasing you, but now backed by vibes, printers, and somebody else\'s debt ceiling.',
-  },
-  {
-    original: 'Pinky',
-    alias: 'Ether',
-    image: '/pacman/app/style/graphics/spriteSheets/characters/ghosts/pinky/pinky_right.svg',
-    color: 'border-pink-400/70 text-pink-200 shadow-[0_0_18px_rgba(244,114,182,0.14)]',
-    copy: 'Promises ultrasound money, then spends three turns explaining gas fees.',
-  },
-  {
-    original: 'Inky',
-    alias: 'Tether',
-    image: '/pacman/app/style/graphics/spriteSheets/characters/ghosts/inky/inky_right.svg',
-    color: 'border-cyan-300/70 text-cyan-200 shadow-[0_0_18px_rgba(34,211,238,0.14)]',
-    copy: 'Definitely fully backed. Please do not ask backed by what while running through the maze.',
-  },
-  {
-    original: 'Clyde',
-    alias: 'Doge',
-    image: '/pacman/app/style/graphics/spriteSheets/characters/ghosts/clyde/clyde_right.svg',
-    color: 'border-orange-400/70 text-orange-200 shadow-[0_0_18px_rgba(251,146,60,0.14)]',
-    copy: 'Much chase. Very ghost. Wow. Somehow still not Bitcoin.',
-  },
-];
+import { HighScoreIdentity } from '@/components/game/GameIntroShared';
+import { ghostIntroductions } from '@/components/game/ghostIntroductions';
 
 export interface PaymentSession {
   sessionId: string;
@@ -321,22 +290,5 @@ export function PaymentGate({ onStart, leaderboard, allTimeEntry, dailyEntry, al
         </div>
       </CardContent>
     </Card>
-  );
-}
-
-function HighScoreIdentity({ entry, className = '' }: { entry?: HighScoreEntry; className?: string }) {
-  const name = getHighScoreDisplayName(entry);
-  const picture = getHighScorePicture(entry);
-
-  return (
-    <div className={`flex min-w-0 items-center gap-2 ${className}`}>
-      <Avatar size="sm" className="border border-cyan-300 bg-black">
-        <AvatarImage src={picture} alt={name} />
-        <AvatarFallback className="bg-black text-xs font-black text-cyan-200">
-          {name.charAt(0).toUpperCase()}
-        </AvatarFallback>
-      </Avatar>
-      <span className="truncate text-xs font-black text-cyan-100">{name}</span>
-    </div>
   );
 }
