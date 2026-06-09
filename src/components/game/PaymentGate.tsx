@@ -11,6 +11,8 @@ import { useWallet } from '@/hooks/useWallet';
 import { useZaps } from '@/hooks/useZaps';
 import { gameConfig } from '@/config/gameConfig';
 import { unlockPacmanAudio } from '@/lib/pacmanAudio';
+import type { HighScoreEntry } from '@/hooks/useHighScores';
+import { formatPlayerPubkey } from '@/hooks/useHighScores';
 
 export interface PaymentSession {
   sessionId: string;
@@ -21,9 +23,13 @@ export interface PaymentSession {
 
 interface PaymentGateProps {
   onStart: (session: PaymentSession) => void;
+  leaderboard: HighScoreEntry[];
+  allTimeHigh: number;
+  dailyHigh: number;
+  isLoadingHighScores: boolean;
 }
 
-export function PaymentGate({ onStart }: PaymentGateProps) {
+export function PaymentGate({ onStart, leaderboard, allTimeHigh, dailyHigh, isLoadingHighScores }: PaymentGateProps) {
   const { user } = useCurrentUser();
   const login = useLoginActions();
   const { webln, activeNWC } = useWallet();
@@ -224,6 +230,38 @@ export function PaymentGate({ onStart }: PaymentGateProps) {
             {status && <p className="text-center text-sm text-zinc-300">{status}</p>}
           </div>
         )}
+      </CardContent>
+      <CardContent className="relative border-t-2 border-blue-700/70 pt-5">
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-3 text-center">
+            <div className="rounded-lg border-2 border-yellow-300 bg-yellow-300/10 p-3 shadow-[0_0_18px_rgba(250,204,21,0.12)]">
+              <div className="text-xs font-black uppercase tracking-widest text-yellow-300">All Time High</div>
+              <div className="mt-1 text-2xl font-black text-white">{allTimeHigh.toLocaleString()}</div>
+            </div>
+            <div className="rounded-lg border-2 border-cyan-300 bg-cyan-300/10 p-3 shadow-[0_0_18px_rgba(34,211,238,0.12)]">
+              <div className="text-xs font-black uppercase tracking-widest text-cyan-300">Daily High</div>
+              <div className="mt-1 text-2xl font-black text-white">{dailyHigh.toLocaleString()}</div>
+            </div>
+          </div>
+          <div className="rounded-xl border-2 border-pink-400 bg-black/80 p-3 shadow-[0_0_24px_rgba(244,114,182,0.12)]">
+            <div className="mb-2 text-center text-sm font-black uppercase tracking-widest text-pink-300">High Scores</div>
+            {isLoadingHighScores ? (
+              <div className="py-4 text-center text-sm text-cyan-100/70">Loading scores from Gamestr...</div>
+            ) : leaderboard.length > 0 ? (
+              <div className="space-y-2">
+                {leaderboard.map((entry, index) => (
+                  <div key={entry.id} className="grid grid-cols-[2rem_1fr_auto] items-center gap-2 rounded border border-blue-700/70 bg-blue-950/25 px-2 py-1.5 text-sm">
+                    <div className="font-black text-yellow-300">#{index + 1}</div>
+                    <div className="truncate text-cyan-100">{formatPlayerPubkey(entry.playerPubkey)}</div>
+                    <div className="font-black text-white">{entry.score.toLocaleString()}</div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-4 text-center text-sm text-cyan-100/70">No Sats-Man scores found yet.</div>
+            )}
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

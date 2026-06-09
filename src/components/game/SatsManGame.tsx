@@ -7,6 +7,7 @@ import { PacmanJsGame } from '@/components/game/PacmanJsGame';
 import { SatsManHeader } from '@/components/game/SatsManHeader';
 import { useScorePublishing } from '@/hooks/useScorePublishing';
 import { useLoginActions } from '@/hooks/useLoginActions';
+import { useHighScores } from '@/hooks/useHighScores';
 import { gameConfig } from '@/config/gameConfig';
 
 interface GameResult {
@@ -23,6 +24,7 @@ export function SatsManGame() {
   const [status, setStatus] = useState<string | null>(null);
   const [shareComplete, setShareComplete] = useState(false);
   const { publishScore, publishSharePost, canSharePost } = useScorePublishing();
+  const highScores = useHighScores();
   const login = useLoginActions();
   const isConferenceMode = typeof window !== 'undefined' && sessionStorage.getItem('satsman_session_origin') === '/conference';
 
@@ -80,16 +82,23 @@ export function SatsManGame() {
       });
       setScoreEventId(scoreEvent.id);
       setStatus('Score published.');
+      void highScores.refetch();
     } catch (error) {
       setStatus(error instanceof Error ? error.message : 'Score publishing failed.');
     }
-  }, [publishScore, session, startedAt]);
+  }, [highScores, publishScore, session, startedAt]);
 
   if (!session) {
     return (
       <div className="min-h-screen bg-black p-4 pt-24">
         <SatsManHeader />
-        <PaymentGate onStart={handleStart} />
+        <PaymentGate
+          onStart={handleStart}
+          leaderboard={highScores.leaderboard}
+          allTimeHigh={highScores.allTimeHigh}
+          dailyHigh={highScores.dailyHigh}
+          isLoadingHighScores={highScores.isLoading}
+        />
       </div>
     );
   }
@@ -156,5 +165,5 @@ export function SatsManGame() {
     );
   }
 
-  return <PacmanJsGame onGameOver={handleGameOver} />;
+  return <PacmanJsGame onGameOver={handleGameOver} allTimeHighScore={highScores.allTimeHigh} dailyHighScore={highScores.dailyHigh} />;
 }

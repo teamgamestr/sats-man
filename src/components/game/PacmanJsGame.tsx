@@ -10,6 +10,8 @@ declare global {
 
 interface PacmanCoordinator {
   destroy?: () => void;
+  highScore?: number | string;
+  highScoreDisplay?: HTMLElement | null;
 }
 
 interface PacmanGameOverDetail {
@@ -20,6 +22,8 @@ interface PacmanGameOverDetail {
 
 interface PacmanJsGameProps {
   onGameOver: (snapshot: { score: number; level: number }) => void;
+  allTimeHighScore: number;
+  dailyHighScore: number;
 }
 
 function loadStylesheet(href: string): HTMLLinkElement {
@@ -51,9 +55,10 @@ function loadScript(src: string): Promise<void> {
   });
 }
 
-export function PacmanJsGame({ onGameOver }: PacmanJsGameProps) {
+export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore }: PacmanJsGameProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const coordinatorRef = useRef<PacmanCoordinator | null>(null);
+  const allTimeHighScoreRef = useRef(allTimeHighScore);
 
   const endGame = useCallback((snapshot: { score: number; level: number }) => {
     window.satsmanPacmanDestroyed = true;
@@ -78,6 +83,9 @@ export function PacmanJsGame({ onGameOver }: PacmanJsGameProps) {
       .then(() => {
         if (cancelled || !window.GameCoordinator) return;
         window.satsmanPacmanDestroyed = false;
+        if (allTimeHighScoreRef.current > 0) {
+          localStorage.setItem('highScore', String(allTimeHighScoreRef.current));
+        }
         coordinatorRef.current = new window.GameCoordinator();
 
         window.setTimeout(() => {
@@ -102,6 +110,23 @@ export function PacmanJsGame({ onGameOver }: PacmanJsGameProps) {
       audioElements?.forEach((audio) => audio.pause());
     };
   }, [endGame]);
+
+  useEffect(() => {
+    allTimeHighScoreRef.current = allTimeHighScore;
+    if (allTimeHighScore > 0) {
+      localStorage.setItem('highScore', String(allTimeHighScore));
+    }
+
+    const coordinator = coordinatorRef.current;
+    if (coordinator && allTimeHighScore > Number(coordinator.highScore || 0)) {
+      coordinator.highScore = allTimeHighScore;
+    }
+
+    const display = document.getElementById('high-score-display');
+    if (display && allTimeHighScore > 0) {
+      display.innerText = String(allTimeHighScore);
+    }
+  }, [allTimeHighScore]);
 
   return (
     <div className="min-h-screen bg-black pt-16 text-white">
@@ -136,14 +161,18 @@ export function PacmanJsGame({ onGameOver }: PacmanJsGameProps) {
           <div id="paused-text" className="paused-text">PAUSED</div>
 
           <div id="game-ui" className="game-ui">
-            <div id="row-top" className="row top">
-              <div className="column _25">
-                <div className="one-up">1UP</div>
-                <div id="points-display" />
+            <div id="row-top" className="row top" style={{ gap: 'clamp(1rem, 4vw, 3rem)', justifyContent: 'center', padding: '0 1rem' }}>
+              <div className="column" style={{ minWidth: '7rem', width: 'auto' }}>
+                <div style={{ textAlign: 'center' }}>SCORE</div>
+                <div id="points-display" style={{ marginRight: 0, textAlign: 'center' }} />
               </div>
-              <div className="column _50">
-                <div>HIGH SCORE</div>
-                <div id="high-score-display" />
+              <div className="column" style={{ minWidth: '9rem', width: 'auto' }}>
+                <div style={{ textAlign: 'center' }}>ALL TIME HIGH</div>
+                <div id="high-score-display" style={{ marginRight: 0, textAlign: 'center' }}>{allTimeHighScore || '00'}</div>
+              </div>
+              <div className="column" style={{ minWidth: '7rem', width: 'auto' }}>
+                <div style={{ textAlign: 'center' }}>DAILY HIGH</div>
+                <div style={{ marginRight: 0, textAlign: 'center' }}>{dailyHighScore || '00'}</div>
               </div>
             </div>
 
