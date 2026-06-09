@@ -680,7 +680,7 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
                   variant="ghost"
                   onClick={() => finishSignup(true)}
                   disabled={isPublishing}
-                  className="w-full font-black uppercase text-cyan-200 hover:text-yellow-300"
+                  className="pacman-btn pacman-btn-cyan w-full"
                 >
                   Skip for now
                 </Button>
@@ -911,7 +911,7 @@ const NsecLoginForm: React.FC<NsecLoginFormProps> = ({
       <Button
         type="submit"
         disabled={isLoggingIn || !loginNsec.trim()}
-        className="flex-1"
+        className="pacman-btn pacman-btn-cyan flex-1"
       >
         {isLoggingIn ? 'Logging in…' : 'Log in'}
       </Button>
@@ -927,6 +927,7 @@ const NsecLoginForm: React.FC<NsecLoginFormProps> = ({
         variant="outline"
         size="icon"
         onClick={() => fileInputRef.current?.click()}
+        className="pacman-btn pacman-btn-yellow"
       >
         <Upload className="w-4 h-4" />
       </Button>

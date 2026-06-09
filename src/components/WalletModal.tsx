@@ -82,11 +82,11 @@ export function WalletModal({ children }: { children?: React.ReactNode }) {
                     </div>
                     <div className="flex items-center gap-1">
                       {active ? <CheckCircle className="h-4 w-4 text-green-600" /> : (
-                        <Button size="icon" variant="ghost" onClick={() => setActiveConnection(connection.connectionString)}>
+                        <Button size="icon" variant="ghost" className="pacman-btn pacman-btn-yellow" onClick={() => setActiveConnection(connection.connectionString)}>
                           <Zap className="h-4 w-4" />
                         </Button>
                       )}
-                      <Button size="icon" variant="ghost" onClick={() => removeConnection(connection.connectionString)}>
+                      <Button size="icon" variant="ghost" className="pacman-btn pacman-btn-red" onClick={() => removeConnection(connection.connectionString)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>

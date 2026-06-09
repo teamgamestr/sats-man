@@ -203,15 +203,19 @@
   }
 
   .pacman-btn-pink {
-    @apply border-pink-400 text-pink-200 shadow-[0_0_18px_rgba(244,114,182,0.14)] hover:border-pink-100 hover:bg-pink-400/15 hover:text-pink-100 hover:shadow-[0_0_28px_rgba(244,114,182,0.30)] focus-visible:ring-pink-300/50;
+    @apply border-pink-400 text-pink-200 shadow-[0_0_18px_rgba(244,114,182,0.14)] hover:border-pink-100 hover:!bg-pink-400 hover:!text-black hover:shadow-[0_0_28px_rgba(244,114,182,0.30)] focus-visible:ring-pink-300/50;
   }
 
   .pacman-btn-orange {
-    @apply border-orange-400 text-orange-200 shadow-[0_0_18px_rgba(251,146,60,0.14)] hover:border-orange-100 hover:bg-orange-400/15 hover:text-orange-100 hover:shadow-[0_0_28px_rgba(251,146,60,0.30)] focus-visible:ring-orange-300/50;
+    @apply border-orange-400 text-orange-200 shadow-[0_0_18px_rgba(251,146,60,0.14)] hover:border-orange-100 hover:!bg-orange-400 hover:!text-black hover:shadow-[0_0_28px_rgba(251,146,60,0.30)] focus-visible:ring-orange-300/50;
   }
 
   .pacman-btn-dark-orange {
-    @apply border-orange-400 text-orange-200 shadow-[0_0_18px_rgba(251,146,60,0.14)] hover:border-orange-100 hover:bg-orange-400/15 hover:text-orange-100 hover:shadow-[0_0_28px_rgba(251,146,60,0.30)] focus-visible:ring-orange-300/50;
+    @apply border-orange-400 text-orange-200 shadow-[0_0_18px_rgba(251,146,60,0.14)] hover:border-orange-100 hover:!bg-orange-400 hover:!text-black hover:shadow-[0_0_28px_rgba(251,146,60,0.30)] focus-visible:ring-orange-300/50;
+  }
+
+  .pacman-btn-red {
+    @apply border-red-400 text-red-200 shadow-[0_0_18px_rgba(248,113,113,0.14)] hover:border-red-100 hover:!bg-red-400 hover:!text-black hover:shadow-[0_0_28px_rgba(248,113,113,0.30)] focus-visible:ring-red-300/50;
   }
 
   .pacman-panel {
@@ -248,11 +252,11 @@
 
   .pacman-panel button:not(.pacman-btn):not([data-slot="dialog-close"]),
   .pacman-menu-content button:not(.pacman-btn) {
-    @apply !border-2 !border-cyan-300 !bg-black !text-cyan-200 shadow-[0_0_18px_rgba(34,211,238,0.14)] hover:!border-cyan-100 hover:!bg-cyan-300/15 hover:!text-cyan-100 hover:shadow-[0_0_28px_rgba(34,211,238,0.30)] focus-visible:!ring-4 focus-visible:!ring-cyan-300/50;
+    @apply !border-2 !border-cyan-300 !bg-black !text-cyan-200 font-black uppercase shadow-[0_0_18px_rgba(34,211,238,0.14)] transition-all hover:-translate-y-0.5 hover:!border-cyan-100 hover:!bg-cyan-300 hover:!text-black hover:shadow-[0_0_28px_rgba(34,211,238,0.30)] focus-visible:-translate-y-0.5 focus-visible:!ring-4 focus-visible:!ring-cyan-300/50;
   }
 
   .pacman-panel button[data-slot="dialog-close"] {
-    @apply !border !border-yellow-300/60 !bg-black !text-yellow-200 hover:!bg-yellow-300/15 hover:!text-yellow-100 focus-visible:!ring-4 focus-visible:!ring-yellow-300/50;
+    @apply !border !border-yellow-300/60 !bg-black !text-yellow-200 hover:!bg-yellow-300 hover:!text-black focus-visible:!ring-4 focus-visible:!ring-yellow-300/50;
   }
 }
 
