@@ -190,10 +190,10 @@ export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore, all
               <div id="dot-container" />
               <p id="pacman" className="pacman" />
               <p id="pacman-arrow" className="pacman" />
-              <p id="clyde" className="ghost" role="img" aria-label="Doge ghost" />
-              <p id="inky" className="ghost" role="img" aria-label="Tether ghost" />
-              <p id="pinky" className="ghost" role="img" aria-label="Ether ghost" />
-              <p id="blinky" className="ghost" role="img" aria-label="Dollar ghost" />
+              <p id="clyde" className="ghost" />
+              <p id="inky" className="ghost" />
+              <p id="pinky" className="ghost" />
+              <p id="blinky" className="ghost" />
             </div>
 
             <div id="bottom-row" className="row bottom">

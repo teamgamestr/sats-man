@@ -282,59 +282,6 @@
   display: none;
 }
 
-.satsman-pacman-host .ghost::after {
-  position: absolute;
-  top: 42%;
-  left: 50%;
-  z-index: 3;
-  color: currentcolor;
-  font-family: "Press Start 2P", monospace;
-  font-size: 0.23rem;
-  line-height: 1;
-  text-align: center;
-  text-shadow: 0 1px 0 rgb(0 0 0), 1px 0 0 rgb(0 0 0), 0 0 4px rgb(0 0 0);
-  transform: translate(-50%, -50%);
-  white-space: nowrap;
-}
-
-.satsman-pacman-host #blinky {
-  color: #6ee7b7;
-}
-
-.satsman-pacman-host #blinky::after {
-  content: "Dollar";
-}
-
-.satsman-pacman-host #pinky {
-  color: #c4b5fd;
-}
-
-.satsman-pacman-host #pinky::after {
-  content: "Ether";
-}
-
-.satsman-pacman-host #inky {
-  color: #34d399;
-}
-
-.satsman-pacman-host #inky::after {
-  content: "Tether";
-}
-
-.satsman-pacman-host #clyde {
-  color: #facc15;
-}
-
-.satsman-pacman-host #clyde::after {
-  content: "Doge";
-}
-
-@media (width >= 640px) {
-  .satsman-pacman-host .ghost::after {
-    font-size: 0.28rem;
-  }
-}
-
 .satsman-pacman-host .material-icons {
   display: inline-flex;
   min-width: 1em;

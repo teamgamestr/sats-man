@@ -15,6 +15,33 @@ import type { HighScoreEntry } from '@/hooks/useHighScores';
 import { getHighScoreDisplayName, getHighScorePicture } from '@/hooks/useHighScores';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
+const ghostIntroductions = [
+  {
+    original: 'Blinky',
+    alias: 'Dollar',
+    color: 'border-red-500/70 text-red-200 shadow-[0_0_18px_rgba(248,113,113,0.14)]',
+    copy: 'Still chasing you, but now backed by vibes, printers, and somebody else\'s debt ceiling.',
+  },
+  {
+    original: 'Pinky',
+    alias: 'Ether',
+    color: 'border-pink-400/70 text-pink-200 shadow-[0_0_18px_rgba(244,114,182,0.14)]',
+    copy: 'Promises ultrasound money, then spends three turns explaining gas fees.',
+  },
+  {
+    original: 'Inky',
+    alias: 'Tether',
+    color: 'border-cyan-300/70 text-cyan-200 shadow-[0_0_18px_rgba(34,211,238,0.14)]',
+    copy: 'Definitely fully backed. Please do not ask backed by what while running through the maze.',
+  },
+  {
+    original: 'Clyde',
+    alias: 'Doge',
+    color: 'border-orange-400/70 text-orange-200 shadow-[0_0_18px_rgba(251,146,60,0.14)]',
+    copy: 'Much chase. Very ghost. Wow. Somehow still not Bitcoin.',
+  },
+];
+
 export interface PaymentSession {
   sessionId: string;
   paid: boolean;
@@ -176,6 +203,22 @@ export function PaymentGate({ onStart, leaderboard, allTimeEntry, dailyEntry, al
         <CardTitle className="sr-only">Sats-Man</CardTitle>
       </CardHeader>
       <CardContent className="relative space-y-5">
+        <section className="rounded-xl border-2 border-yellow-300/70 bg-yellow-300/10 p-3 shadow-[0_0_28px_rgba(250,204,21,0.14)]" aria-labelledby="ghost-intro-title">
+          <h2 id="ghost-intro-title" className="text-center text-sm font-black uppercase tracking-widest text-yellow-300">
+            Meet The Rebrand
+          </h2>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            {ghostIntroductions.map((ghost) => (
+              <div key={ghost.alias} className={`rounded-lg border bg-black/70 p-3 ${ghost.color}`}>
+                <div className="flex items-center justify-between gap-2 text-xs font-black uppercase tracking-widest">
+                  <span className="text-white/45 line-through decoration-2">{ghost.original}</span>
+                  <span className="text-yellow-300">{ghost.alias}</span>
+                </div>
+                <p className="mt-2 text-xs leading-relaxed text-cyan-50/78">{ghost.copy}</p>
+              </div>
+            ))}
+          </div>
+        </section>
         {!user ? (
           <div className="space-y-4 text-center">
             <div className="grid gap-3 sm:grid-cols-3">
