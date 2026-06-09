@@ -4,6 +4,8 @@ import type { NostrEvent } from '@nostrify/nostrify';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { gameConfig } from '@/config/gameConfig';
 
+const SCORE_RELAYS = ['wss://relay.gamestr.io'];
+
 interface ScorePublishingOptions {
   sessionId: string;
   score: number;
@@ -63,6 +65,7 @@ export function useScorePublishing() {
     if (data.relays?.length) {
       await nostr.group(data.relays).event(data.event);
     } else {
+      await nostr.event(data.event, { relays: SCORE_RELAYS });
       await nostr.event(data.event);
     }
     return data.event;
