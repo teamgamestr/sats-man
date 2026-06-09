@@ -21,7 +21,7 @@ export const gameConfig: GameConfig = {
   costToPlay: 210,
   zapMemo: 'Playing Sats-Man on Gamestr',
   freePlayEnabled: true,
-  testMode: true,
+  testMode: false,
   testModeRelays: ['wss://test.gamestr.io'],
   scoreUrlBase: 'https://gamestr.io/sats-man/score/',
 };
