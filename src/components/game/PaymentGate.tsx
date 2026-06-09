@@ -124,25 +124,34 @@ export function PaymentGate({ onStart }: PaymentGateProps) {
 
   if (invoice) {
     return (
-      <Card className="mx-auto max-w-md border-yellow-400 bg-black text-white">
-        <CardHeader className="text-center">
+      <Card className="relative mx-auto max-w-md overflow-hidden border-4 border-yellow-300 bg-black text-white shadow-[0_0_70px_rgba(250,204,21,0.26)]">
+        <CardHeader className="relative text-center">
           <div className="flex items-center justify-between gap-2">
-            <CardTitle className="flex-1 text-yellow-300">Pay To Play</CardTitle>
-            <Button size="icon" variant="ghost" onClick={() => { resetInvoice(); setTrackedInvoice(null); setIsAwaitingReceipt(false); }}>
+            <CardTitle className="flex-1 text-2xl font-black uppercase tracking-widest text-yellow-300 drop-shadow-[0_0_14px_rgba(250,204,21,0.45)]">Pay To Play</CardTitle>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="border-2 border-orange-400 bg-black text-orange-200 hover:bg-orange-400 hover:text-black focus-visible:ring-4 focus-visible:ring-orange-300/60"
+              onClick={() => { resetInvoice(); setTrackedInvoice(null); setIsAwaitingReceipt(false); }}
+            >
               <X className="h-4 w-4" />
             </Button>
           </div>
-          <CardDescription>{gameConfig.costToPlay} sats to start this game</CardDescription>
+          <CardDescription className="font-black uppercase tracking-widest text-cyan-100/85">
+            {gameConfig.costToPlay} sats to start this game
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="rounded-lg bg-white p-4">{qrCodeDataUrl ? <img src={qrCodeDataUrl} alt="Lightning invoice QR" className="mx-auto" /> : null}</div>
-          <Button className="w-full" variant="outline" onClick={() => void navigator.clipboard.writeText(invoice)}>
+          <div className="rounded-xl border-4 border-cyan-300 bg-white p-4 shadow-[0_0_30px_rgba(34,211,238,0.22)]">
+            {qrCodeDataUrl ? <img src={qrCodeDataUrl} alt="Lightning invoice QR" className="mx-auto" /> : null}
+          </div>
+          <Button className="pacman-btn pacman-btn-cyan h-12 w-full" variant="outline" onClick={() => void navigator.clipboard.writeText(invoice)}>
             <Copy className="mr-2 h-4 w-4" /> Copy Invoice
           </Button>
-          <div className="flex items-center justify-center gap-2 rounded border border-blue-400/60 bg-blue-950/40 p-3 text-sm text-blue-100">
+          <div className="flex items-center justify-center gap-2 rounded-lg border-2 border-yellow-300 bg-yellow-300/10 p-3 text-sm font-black uppercase tracking-wider text-yellow-100 shadow-[0_0_20px_rgba(250,204,21,0.14)]">
             <Loader2 className="h-4 w-4 animate-spin" /> Waiting for zap receipt
           </div>
-          {status && <p className="text-center text-sm text-zinc-300">{status}</p>}
+          {status && <p className="rounded border border-cyan-300/40 bg-cyan-300/10 p-3 text-center text-sm text-cyan-50">{status}</p>}
         </CardContent>
       </Card>
     );
