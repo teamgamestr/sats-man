@@ -284,20 +284,16 @@
 
 .satsman-pacman-host .ghost::after {
   position: absolute;
-  top: -0.7rem;
+  top: 42%;
   left: 50%;
   z-index: 3;
-  border: 1px solid currentcolor;
-  background: rgb(0 0 0 / 0.84);
-  box-shadow: 0 0 8px currentcolor;
   color: currentcolor;
   font-family: "Press Start 2P", monospace;
-  font-size: 0.3rem;
+  font-size: 0.23rem;
   line-height: 1;
-  padding: 0.125rem 0.1875rem;
   text-align: center;
-  text-shadow: 0 0 4px currentcolor;
-  transform: translateX(-50%);
+  text-shadow: 0 1px 0 rgb(0 0 0), 1px 0 0 rgb(0 0 0), 0 0 4px rgb(0 0 0);
+  transform: translate(-50%, -50%);
   white-space: nowrap;
 }
 
@@ -335,9 +331,7 @@
 
 @media (width >= 640px) {
   .satsman-pacman-host .ghost::after {
-    top: -0.85rem;
-    font-size: 0.36rem;
-    padding: 0.15625rem 0.25rem;
+    font-size: 0.28rem;
   }
 }
 
