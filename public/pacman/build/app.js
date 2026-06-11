@@ -1384,19 +1384,19 @@ class GameCoordinator {
       const totalSources = imgSources.length + audioSources.length;
       this.remainingSources = totalSources;
 
-      loadingPacman.style.left = '0';
-      loadingDotMask.style.width = '0';
+      if (loadingPacman) loadingPacman.style.left = '0';
+      if (loadingDotMask) loadingDotMask.style.width = '0';
 
       Promise.all([
         this.createElements(imgSources, 'img', totalSources, this),
         this.createElements(audioSources, 'audio', totalSources, this),
       ])
         .then(() => {
-          loadingContainer.style.opacity = 0;
+          if (loadingContainer) loadingContainer.style.opacity = 0;
           resolve();
 
           setTimeout(() => {
-            loadingContainer.remove();
+            if (loadingContainer?.isConnected) loadingContainer.remove();
             this.mainMenu.style.opacity = 1;
             this.mainMenu.style.visibility = 'visible';
           }, 1500);
@@ -1417,8 +1417,9 @@ class GameCoordinator {
     const loadingContainer = document.getElementById('loading-container');
     const preloadDiv = document.getElementById('preload-div');
     const loadingPacman = document.getElementById('loading-pacman');
-    const containerWidth = loadingContainer.scrollWidth
-      - loadingPacman.scrollWidth;
+    const containerWidth = loadingContainer && loadingPacman
+      ? loadingContainer.scrollWidth - loadingPacman.scrollWidth
+      : 0;
     const loadingDotMask = document.getElementById('loading-dot-mask');
 
     const gameCoordRef = gameCoord;
@@ -1428,14 +1429,14 @@ class GameCoordinator {
 
       sources.forEach((source) => {
         const element = type === 'img' ? new Image() : new Audio();
-        preloadDiv.appendChild(element);
+        if (preloadDiv) preloadDiv.appendChild(element);
 
         const elementReady = () => {
           gameCoordRef.remainingSources -= 1;
           loadedSources += 1;
           const percent = 1 - gameCoordRef.remainingSources / totalSources;
-          loadingPacman.style.left = `${percent * containerWidth}px`;
-          loadingDotMask.style.width = loadingPacman.style.left;
+          if (loadingPacman) loadingPacman.style.left = `${percent * containerWidth}px`;
+          if (loadingDotMask && loadingPacman) loadingDotMask.style.width = loadingPacman.style.left;
 
           if (loadedSources === sources.length) {
             resolve();
