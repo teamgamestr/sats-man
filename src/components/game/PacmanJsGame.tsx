@@ -233,7 +233,7 @@ function isPotentiallyPlayable(snapshot: PacmanDiagnosticSnapshot): boolean {
 
 function PacmanDiagnosticsHud({ snapshot, suspectedFreeze }: { snapshot: PacmanDiagnosticSnapshot; suspectedFreeze: boolean }) {
   return (
-    <div className="hidden min-w-0 max-w-72 rounded-lg border border-cyan-300/50 bg-black/85 p-2 font-mono text-[0.55rem] leading-tight text-cyan-100 shadow-[0_0_18px_rgba(34,211,238,0.22)] sm:block lg:text-[0.65rem]">
+    <div className="max-w-[18rem] rounded-lg border border-cyan-300/50 bg-black/85 p-2 font-mono text-[0.55rem] leading-tight text-cyan-100 shadow-[0_0_18px_rgba(34,211,238,0.22)] sm:text-[0.65rem]">
       <div className="font-black uppercase tracking-widest text-cyan-300">Diagnostics</div>
       <div>FPS {snapshot.fps} | timers {snapshot.activeTimers} | dots {snapshot.remainingDots}</div>
       <div>run {snapshot.engineRunning ? 'yes' : 'no'} | move {snapshot.pacmanMoving ? 'yes' : 'no'} | cutscene {snapshot.cutscene ? 'yes' : 'no'}</div>
@@ -384,17 +384,19 @@ export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore, all
   return (
     <div className="min-h-screen bg-black pt-20 text-white">
       <SatsManHeader>
-        {diagnosticSnapshot && <PacmanDiagnosticsHud snapshot={diagnosticSnapshot} suspectedFreeze={Boolean(suspectedFreeze)} />}
+        <div className="hidden min-w-0 max-w-3xl grid-cols-3 gap-2 rounded-xl border-2 border-blue-700 bg-black/80 p-2 text-center text-[0.55rem] shadow-[0_0_28px_rgba(37,99,235,0.26)] backdrop-blur-sm sm:grid lg:text-[0.65rem]">
+          <HudScoreBlock label="Score" valueId="points-display" />
+          <HudScoreBlock label="All Time High" value={allTimeHighScore} entry={allTimeEntry} />
+          <HudScoreBlock label="Daily High" value={dailyHighScore} entry={dailyEntry} />
+        </div>
       </SatsManHeader>
       <div ref={hostRef} className="satsman-pacman-host">
         <div id="overflow-mask" className="overflow-mask">
-          <div className="pointer-events-none absolute left-0 right-0 top-3 z-[3] px-3 text-center text-[0.55rem] sm:top-4 sm:text-[0.65rem]">
-            <div className="mx-auto grid max-w-3xl grid-cols-3 gap-2 rounded-xl border-2 border-blue-700 bg-black/80 p-2 shadow-[0_0_28px_rgba(37,99,235,0.26)] backdrop-blur-sm">
-              <HudScoreBlock label="Score" valueId="points-display" />
-              <HudScoreBlock label="All Time High" value={allTimeHighScore} entry={allTimeEntry} />
-              <HudScoreBlock label="Daily High" value={dailyHighScore} entry={dailyEntry} />
+          {diagnosticSnapshot && (
+            <div className="pointer-events-none absolute bottom-3 left-3 z-[4]">
+              <PacmanDiagnosticsHud snapshot={diagnosticSnapshot} suspectedFreeze={Boolean(suspectedFreeze)} />
             </div>
-          </div>
+          )}
           <div id="fps-display" className="fps-display" />
           <div id="preload-div" className="preload-div" />
 
