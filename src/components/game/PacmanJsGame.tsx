@@ -384,7 +384,7 @@ export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore, all
   return (
     <div className="min-h-screen bg-black pt-32 text-white">
       <SatsManHeader>
-        <div className="hidden min-w-0 max-w-3xl grid-cols-3 gap-2 rounded-xl border-2 border-blue-700 bg-black/80 p-2 text-center text-[0.55rem] shadow-[0_0_28px_rgba(37,99,235,0.26)] backdrop-blur-sm sm:grid lg:text-[0.65rem]">
+        <div className="hidden min-w-0 max-w-full grid-cols-3 gap-1 rounded-xl border-2 border-blue-700 bg-black/80 p-1 text-center text-[0.5rem] shadow-[0_0_28px_rgba(37,99,235,0.26)] backdrop-blur-sm sm:grid lg:text-[0.6rem]">
           <HudScoreBlock label="Score" valueId="points-display" />
           <HudScoreBlock label="All Time High" value={allTimeHighScore} entry={allTimeEntry} />
           <HudScoreBlock label="Daily High" value={dailyHighScore} entry={dailyEntry} />

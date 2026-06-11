@@ -11,7 +11,7 @@ export function SatsManHeader({ children }: SatsManHeaderProps) {
         <a href="/" aria-label="Go to Sats-Man home" className="flex items-center rounded-lg focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-300/60">
           <img src="/sats-man-logo.png" alt="Sats-Man" className="h-12 w-auto object-contain" />
         </a>
-        <div className="pointer-events-none absolute left-1/2 top-1/2 flex w-[min(52rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 justify-center">
+        <div className="pointer-events-none absolute left-1/2 top-1/2 flex w-[min(36rem,calc(100vw-14rem))] -translate-x-1/2 -translate-y-1/2 justify-center overflow-hidden">
           {children}
         </div>
         <div className="flex min-w-0 items-center justify-end gap-2">
