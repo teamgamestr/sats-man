@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { SatsManHeader } from '@/components/game/SatsManHeader';
 import type { HighScoreEntry } from '@/hooks/useHighScores';
 import { getHighScoreDisplayName, getHighScorePicture } from '@/hooks/useHighScores';
@@ -15,7 +15,71 @@ interface PacmanCoordinator {
   destroy?: () => void;
   highScore?: number | string;
   highScoreDisplay?: HTMLElement | null;
+  gameEngine?: PacmanGameEngine;
+  pacman?: PacmanEntity;
+  ghosts?: PacmanEntity[];
+  activeTimers?: PacmanTimer[];
+  allowPacmanMovement?: boolean;
+  allowPause?: boolean;
+  cutscene?: boolean;
+  remainingDots?: number;
+  level?: number;
+  lives?: number;
+  points?: number;
 }
+
+interface PacmanGameEngine {
+  running?: boolean;
+  started?: boolean;
+  lastFrameTimeMs?: number;
+  fps?: number;
+}
+
+interface PacmanEntity {
+  moving?: boolean;
+  paused?: boolean;
+  display?: boolean;
+  position?: {
+    left?: number;
+    top?: number;
+    x?: number;
+    y?: number;
+  };
+}
+
+interface PacmanTimer {
+  timerId?: number;
+  remaining?: number;
+  pausedBySystem?: boolean;
+}
+
+interface PacmanDiagnosticSnapshot {
+  sampledAt: number;
+  score: number;
+  level: number;
+  lives: number;
+  remainingDots: number;
+  engineRunning: boolean;
+  engineStarted: boolean;
+  pacmanMoving: boolean;
+  allowPacmanMovement: boolean;
+  allowPause: boolean;
+  cutscene: boolean;
+  activeTimers: number;
+  fps: number;
+  lastFrameTimeMs: number;
+  pacmanPosition: string;
+  ghostState: string;
+}
+
+interface PacmanWatchdogState {
+  lastProgressKey: string;
+  lastProgressAt: number;
+  lastWarningAt: number;
+}
+
+const WATCHDOG_SAMPLE_MS = 1000;
+const WATCHDOG_STALL_MS = 5000;
 
 interface PacmanGameOverDetail {
   score: number;
@@ -114,10 +178,66 @@ function gamepadDirectionToKeyCode(direction: GamepadDirection): number {
   }
 }
 
+function formatPosition(entity?: PacmanEntity): string {
+  const position = entity?.position;
+  if (!position) return 'unknown';
+  const x = position.left ?? position.x ?? 0;
+  const y = position.top ?? position.y ?? 0;
+  return `${Math.round(x)},${Math.round(y)}`;
+}
+
+function createDiagnosticSnapshot(coordinator: PacmanCoordinator): PacmanDiagnosticSnapshot {
+  const engine = coordinator.gameEngine;
+  const ghosts = coordinator.ghosts ?? [];
+
+  return {
+    sampledAt: Date.now(),
+    score: Number(coordinator.points ?? 0),
+    level: Number(coordinator.level ?? 1),
+    lives: Number(coordinator.lives ?? 0),
+    remainingDots: Number(coordinator.remainingDots ?? 0),
+    engineRunning: Boolean(engine?.running),
+    engineStarted: Boolean(engine?.started),
+    pacmanMoving: Boolean(coordinator.pacman?.moving),
+    allowPacmanMovement: Boolean(coordinator.allowPacmanMovement),
+    allowPause: Boolean(coordinator.allowPause),
+    cutscene: Boolean(coordinator.cutscene),
+    activeTimers: coordinator.activeTimers?.length ?? 0,
+    fps: Math.round(Number(engine?.fps ?? 0)),
+    lastFrameTimeMs: Math.round(Number(engine?.lastFrameTimeMs ?? 0)),
+    pacmanPosition: formatPosition(coordinator.pacman),
+    ghostState: ghosts.map((ghost) => `${formatPosition(ghost)}:${ghost.moving ? 'm' : 's'}:${ghost.paused ? 'p' : 'r'}`).join('|'),
+  };
+}
+
+function getProgressKey(snapshot: PacmanDiagnosticSnapshot): string {
+  return [
+    snapshot.score,
+    snapshot.remainingDots,
+    snapshot.level,
+    snapshot.lives,
+    snapshot.pacmanPosition,
+    snapshot.ghostState,
+    snapshot.lastFrameTimeMs,
+  ].join('|');
+}
+
+function isPotentiallyPlayable(snapshot: PacmanDiagnosticSnapshot): boolean {
+  return snapshot.engineStarted
+    && snapshot.engineRunning
+    && snapshot.allowPause
+    && !snapshot.cutscene
+    && snapshot.remainingDots > 0
+    && snapshot.lives >= 0;
+}
+
 export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore, allTimeEntry, dailyEntry }: PacmanJsGameProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const coordinatorRef = useRef<PacmanCoordinator | null>(null);
   const allTimeHighScoreRef = useRef(allTimeHighScore);
+  const watchdogRef = useRef<PacmanWatchdogState>({ lastProgressKey: '', lastProgressAt: 0, lastWarningAt: 0 });
+  const [diagnosticSnapshot, setDiagnosticSnapshot] = useState<PacmanDiagnosticSnapshot | null>(null);
+  const [suspectedFreeze, setSuspectedFreeze] = useState<PacmanDiagnosticSnapshot | null>(null);
   const gamepadStateRef = useRef<{ frameId: number; lastDirection: GamepadDirection | null; lastPausePressed: boolean }>({
     frameId: 0,
     lastDirection: null,
@@ -138,7 +258,32 @@ export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore, all
     const host = hostRef.current;
     const handleResize = () => syncGameViewport(hostRef.current);
     const gamepadState = gamepadStateRef.current;
+    watchdogRef.current = { lastProgressKey: '', lastProgressAt: Date.now(), lastWarningAt: 0 };
     window.addEventListener('resize', handleResize);
+
+    const watchdogInterval = window.setInterval(() => {
+      const coordinator = coordinatorRef.current;
+      if (!coordinator) return;
+
+      const snapshot = createDiagnosticSnapshot(coordinator);
+      setDiagnosticSnapshot(snapshot);
+      const progressKey = getProgressKey(snapshot);
+      const watchdog = watchdogRef.current;
+
+      if (progressKey !== watchdog.lastProgressKey || !isPotentiallyPlayable(snapshot)) {
+        watchdog.lastProgressKey = progressKey;
+        watchdog.lastProgressAt = snapshot.sampledAt;
+        if (!isPotentiallyPlayable(snapshot)) setSuspectedFreeze(null);
+        return;
+      }
+
+      const stalledMs = snapshot.sampledAt - watchdog.lastProgressAt;
+      if (stalledMs >= WATCHDOG_STALL_MS && snapshot.sampledAt - watchdog.lastWarningAt >= WATCHDOG_STALL_MS) {
+        watchdog.lastWarningAt = snapshot.sampledAt;
+        setSuspectedFreeze(snapshot);
+        console.warn('[Sats-Man] Pacman watchdog suspected a freeze', { stalledMs, snapshot });
+      }
+    }, WATCHDOG_SAMPLE_MS);
 
     const handleGameOver = (event: Event) => {
       const detail = (event as CustomEvent<PacmanGameOverDetail>).detail;
@@ -199,6 +344,7 @@ export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore, all
       window.satsmanPacmanDestroyed = true;
       window.removeEventListener('satsman:pacman-game-over', handleGameOver);
       window.removeEventListener('resize', handleResize);
+      window.clearInterval(watchdogInterval);
       window.cancelAnimationFrame(gamepadState.frameId);
       coordinatorRef.current?.destroy?.();
       coordinatorRef.current = null;
@@ -229,6 +375,14 @@ export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore, all
       <SatsManHeader />
       <div ref={hostRef} className="satsman-pacman-host">
         <div id="overflow-mask" className="overflow-mask">
+          {diagnosticSnapshot && (
+            <div className="pointer-events-none absolute bottom-3 left-3 z-[4] max-w-[18rem] rounded-lg border border-cyan-300/50 bg-black/85 p-2 font-mono text-[0.55rem] leading-tight text-cyan-100 shadow-[0_0_18px_rgba(34,211,238,0.22)] sm:text-[0.65rem]">
+              <div className="font-black uppercase tracking-widest text-cyan-300">Diagnostics</div>
+              <div>FPS {diagnosticSnapshot.fps} | timers {diagnosticSnapshot.activeTimers} | dots {diagnosticSnapshot.remainingDots}</div>
+              <div>run {diagnosticSnapshot.engineRunning ? 'yes' : 'no'} | move {diagnosticSnapshot.pacmanMoving ? 'yes' : 'no'} | cutscene {diagnosticSnapshot.cutscene ? 'yes' : 'no'}</div>
+              {suspectedFreeze && <div className="mt-1 text-yellow-300">Watchdog: possible freeze logged</div>}
+            </div>
+          )}
           <div className="pointer-events-none absolute left-0 right-0 top-3 z-[3] px-3 text-center text-[0.55rem] sm:top-4 sm:text-[0.65rem]">
             <div className="mx-auto grid max-w-3xl grid-cols-3 gap-2 rounded-xl border-2 border-blue-700 bg-black/80 p-2 shadow-[0_0_28px_rgba(37,99,235,0.26)] backdrop-blur-sm">
               <HudScoreBlock label="Score" valueId="points-display" />
