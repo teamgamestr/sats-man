@@ -172,8 +172,6 @@ export function SatsManGame() {
       onGameOver={handleGameOver}
       allTimeHighScore={highScores.allTimeHigh}
       dailyHighScore={highScores.dailyHigh}
-      allTimeEntry={highScores.allTimeEntry}
-      dailyEntry={highScores.dailyEntry}
     />
   );
 }

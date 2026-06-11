@@ -262,13 +262,13 @@
 
 .satsman-pacman-host .overflow-mask {
   box-sizing: border-box;
-  height: calc(100svh - 8rem);
+  height: calc(100svh - 5rem);
   align-items: center;
   padding: 0.75rem;
 }
 
 .satsman-pacman-host .loading-cover {
-  height: calc(100svh - 8rem);
+  height: calc(100svh - 5rem);
 }
 
 .satsman-pacman-host .game-ui {

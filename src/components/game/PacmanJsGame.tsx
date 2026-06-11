@@ -1,8 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SatsManHeader } from '@/components/game/SatsManHeader';
-import type { HighScoreEntry } from '@/hooks/useHighScores';
-import { getHighScoreDisplayName, getHighScorePicture } from '@/hooks/useHighScores';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 declare global {
   interface Window {
@@ -93,8 +90,6 @@ interface PacmanJsGameProps {
   onGameOver: (snapshot: { score: number; level: number }) => void;
   allTimeHighScore: number;
   dailyHighScore: number;
-  allTimeEntry?: HighScoreEntry;
-  dailyEntry?: HighScoreEntry;
 }
 
 function loadStylesheet(href: string): HTMLLinkElement {
@@ -242,7 +237,7 @@ function PacmanDiagnosticsHud({ snapshot, suspectedFreeze }: { snapshot: PacmanD
   );
 }
 
-export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore, allTimeEntry, dailyEntry }: PacmanJsGameProps) {
+export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore }: PacmanJsGameProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const coordinatorRef = useRef<PacmanCoordinator | null>(null);
   const allTimeHighScoreRef = useRef(allTimeHighScore);
@@ -382,12 +377,12 @@ export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore, all
   }, [allTimeHighScore]);
 
   return (
-    <div className="min-h-screen bg-black pt-32 text-white">
+    <div className="min-h-screen bg-black pt-20 text-white">
       <SatsManHeader>
         <div className="hidden min-w-0 max-w-full grid-cols-3 gap-1 rounded-xl border-2 border-blue-700 bg-black/80 p-1 text-center text-[0.5rem] shadow-[0_0_28px_rgba(37,99,235,0.26)] backdrop-blur-sm sm:grid lg:text-[0.6rem]">
-          <HudScoreBlock label="Score" valueId="points-display" />
-          <HudScoreBlock label="All Time High" value={allTimeHighScore} entry={allTimeEntry} />
-          <HudScoreBlock label="Daily High" value={dailyHighScore} entry={dailyEntry} />
+          <HeaderHudScoreBlock label="Score" valueId="points-display" />
+          <HeaderHudScoreBlock label="All Time High" value={allTimeHighScore} />
+          <HeaderHudScoreBlock label="Daily High" value={dailyHighScore} />
         </div>
       </SatsManHeader>
       <div ref={hostRef} className="satsman-pacman-host">
@@ -474,31 +469,13 @@ export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore, all
   );
 }
 
-function HudScoreBlock({ label, value, valueId, entry }: { label: string; value?: number; valueId?: string; entry?: HighScoreEntry }) {
+function HeaderHudScoreBlock({ label, value, valueId }: { label: string; value?: number; valueId?: string }) {
   return (
-    <div className="min-w-0 rounded-lg border border-cyan-300/40 bg-cyan-300/10 px-2 py-1">
-      <div className="truncate font-black uppercase tracking-widest text-cyan-300">{label}</div>
-      <div id={valueId} className="mt-1 text-sm font-black text-white sm:text-base">
+    <div className="min-w-0 rounded-md border border-cyan-300/40 bg-cyan-300/10 px-2 py-0.5">
+      <div className="truncate font-black uppercase leading-tight tracking-widest text-cyan-300">{label}</div>
+      <div id={valueId} className="truncate text-sm font-black leading-tight text-white">
         {typeof value === 'number' ? (value || 0).toLocaleString() : '00'}
       </div>
-      {entry && <HudScorer entry={entry} />}
-    </div>
-  );
-}
-
-function HudScorer({ entry }: { entry?: HighScoreEntry }) {
-  const name = getHighScoreDisplayName(entry);
-  const picture = getHighScorePicture(entry);
-
-  return (
-    <div className="mt-1 flex min-w-0 items-center justify-center gap-1 text-[0.55rem] text-cyan-100">
-      <Avatar size="sm" className="size-5 border border-cyan-300 bg-black">
-        <AvatarImage src={picture} alt={name} />
-        <AvatarFallback className="bg-black text-[0.5rem] font-black text-cyan-200">
-          {name.charAt(0).toUpperCase()}
-        </AvatarFallback>
-      </Avatar>
-      <span className="max-w-24 truncate">{name}</span>
     </div>
   );
 }
