@@ -2597,6 +2597,7 @@ class Pickup {
   reset() {
     this.animationTarget.style.visibility = (this.type === 'fruit')
       ? 'hidden' : 'visible';
+    this.animationTarget.style.display = '';
   }
 
   /**
@@ -2745,6 +2746,7 @@ class Pickup {
         size: this.pacman.measurement,
       })) {
         this.animationTarget.style.visibility = 'hidden';
+        this.animationTarget.style.display = 'none';
         window.dispatchEvent(new CustomEvent('awardPoints', {
           detail: {
             points: this.points,
