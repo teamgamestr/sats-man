@@ -5,7 +5,9 @@ import { NSchema as n, type NostrEvent, type NostrMetadata } from '@nostrify/nos
 import { nip19 } from 'nostr-tools';
 import { gameConfig } from '@/config/gameConfig';
 
-const SCORE_RELAYS = ['wss://relay.gamestr.io', 'wss://relay.ditto.pub'];
+const SCORE_RELAYS = gameConfig.testMode
+  ? gameConfig.testModeRelays
+  : ['wss://relay.gamestr.io', 'wss://relay.ditto.pub'];
 
 export interface HighScoreEntry {
   id: string;
