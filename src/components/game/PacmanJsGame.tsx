@@ -273,6 +273,9 @@ export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore }: P
 
       const snapshot = createDiagnosticSnapshot(coordinator);
       setDiagnosticSnapshot(snapshot);
+      if (!snapshot.engineRunning && snapshot.fps === 0 && snapshot.remainingDots === 0) {
+        console.log('[Sats-Man] Diagnostics: coordinator exists but game not running. GameEngine:', coordinator.gameEngine, 'Pacman:', coordinator.pacman);
+      }
       const progressKey = getProgressKey(snapshot);
       const watchdog = watchdogRef.current;
 
@@ -335,7 +338,8 @@ export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore }: P
         window.setTimeout(() => {
           if (cancelled) return;
           const startButton = document.getElementById('game-start') as HTMLButtonElement | null;
-          if (startButton && !startButton.disabled) {
+          if (startButton) {
+            if (startButton.disabled) startButton.disabled = false;
             startButton.click();
             window.setTimeout(() => syncGameViewport(hostRef.current), 0);
           }
@@ -356,6 +360,8 @@ export function PacmanJsGame({ onGameOver, allTimeHighScore, dailyHighScore }: P
       coordinatorRef.current = null;
       const audioElements = host?.querySelectorAll('audio');
       audioElements?.forEach((audio) => audio.pause());
+      const startButton = document.getElementById('game-start') as HTMLButtonElement | null;
+      if (startButton) startButton.disabled = false;
     };
   }, [endGame]);
 
