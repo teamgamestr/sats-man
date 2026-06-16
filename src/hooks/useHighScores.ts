@@ -6,9 +6,7 @@ import { nip19 } from 'nostr-tools';
 import { gameConfig } from '@/config/gameConfig';
 
 const PUBLIC_SCORE_RELAYS = ['wss://relay.gamestr.io', 'wss://relay.ditto.pub'] as const;
-const SCORE_RELAYS = gameConfig.testMode
-  ? [...gameConfig.testModeRelays]
-  : [...PUBLIC_SCORE_RELAYS];
+const SCORE_RELAYS = [...PUBLIC_SCORE_RELAYS, ...gameConfig.testModeRelays];
 
 export interface HighScoreEntry {
   id: string;
