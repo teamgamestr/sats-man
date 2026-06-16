@@ -7,7 +7,7 @@ import { gameConfig } from '@/config/gameConfig';
 
 const PUBLIC_SCORE_RELAYS = ['wss://relay.gamestr.io', 'wss://relay.ditto.pub'] as const;
 const SCORE_RELAYS = gameConfig.testMode
-  ? [...PUBLIC_SCORE_RELAYS, ...gameConfig.testModeRelays]
+  ? [...gameConfig.testModeRelays]
   : [...PUBLIC_SCORE_RELAYS];
 
 export interface HighScoreEntry {
@@ -75,7 +75,7 @@ function withMetadata(entries: HighScoreEntry[], profiles: Map<string, NostrMeta
 
 function startOfToday() {
   const now = new Date();
-  return Math.floor(new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000);
+  return Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) / 1000;
 }
 
 export function formatPlayerPubkey(pubkey: string): string {
