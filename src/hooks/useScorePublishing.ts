@@ -76,8 +76,13 @@ export function useScorePublishing() {
     }
 
     const data = await response.json() as { event: NostrEvent; relays?: string[] };
-    if (data.relays?.length) {
-      await publishToRelays(nostr, data.event, data.relays);
+    const targetRelays = data.relays?.length
+      ? data.relays
+      : gameConfig.testMode
+        ? gameConfig.testModeRelays
+        : undefined;
+    if (targetRelays) {
+      await publishToRelays(nostr, data.event, targetRelays);
     } else {
       await publishProductionScore(nostr, data.event);
     }
