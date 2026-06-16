@@ -466,7 +466,7 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="pacman-panel max-h-[90dvh] max-w-[95vw] gap-0 overflow-hidden overflow-y-auto rounded-2xl p-0 sm:max-w-sm">
+      <DialogContent aria-describedby={undefined} className="pacman-panel max-h-[90dvh] max-w-[95vw] gap-0 overflow-hidden overflow-y-auto rounded-2xl p-0 sm:max-w-sm">
         <DialogHeader className="px-6 pt-6">
           <DialogTitle className="pacman-panel-title leading-none">
             {getTitle()}
