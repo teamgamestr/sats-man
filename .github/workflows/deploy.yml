@@ -14,5 +14,12 @@ jobs:
     runs-on: [self-hosted, sats-man]
     timeout-minutes: 10
     steps:
+      - name: Select the production branch
+        run: |
+          if ! git -C /home/ubuntu/gamestr/sats-man diff --quiet || ! git -C /home/ubuntu/gamestr/sats-man diff --cached --quiet; then
+            git -C /home/ubuntu/gamestr/sats-man stash push --message "auto-stash before switching to master $(date +%Y%m%d-%H%M%S)"
+          fi
+          git -C /home/ubuntu/gamestr/sats-man fetch origin master
+          git -C /home/ubuntu/gamestr/sats-man switch master
       - name: Run deploy script
         run: /home/ubuntu/gamestr/deploy sats-man
