@@ -9,6 +9,9 @@ import {
   ChevronUp,
   Loader2,
   ExternalLink,
+  Copy,
+  Check,
+  QrCode,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,13 +28,12 @@ import { toast } from '@/hooks/useToast';
 import {
   useLoginActions,
   generateNostrConnectParams,
-  generateNostrConnectURI,
   type NostrConnectParams,
   type NostrConnectStatus,
 } from '@/hooks/useLoginActions';
+import { buildNostrConnectUri } from '@/lib/nostrConnect';
 import { useNostrPublish } from '@/hooks/useNostrPublish';
 import { useUploadFile } from '@/hooks/useUploadFile';
-import { useIsMobile } from '@/hooks/useIsMobile';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { generateSecretKey, getPublicKey, nip19 } from 'nostr-tools';
 
@@ -56,12 +58,6 @@ const connectStatusLabel = (status: NostrConnectStatus | null): string => {
       return '';
   }
 };
-
-/** Check if running on an actual mobile device (not just a small screen). */
-function isMobileDevice(): boolean {
-  if (typeof navigator === 'undefined') return false;
-  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-}
 
 /** Download an nsec to a text file — same behavior as the previous SignupDialog. */
 function downloadNsecFile(nsec: string) {
@@ -91,9 +87,7 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
     const params = generateNostrConnectParams(login.getRelayUrls());
     return {
       params,
-      uri: generateNostrConnectURI(params, {
-        callback: isMobileDevice() ? `${window.location.origin}/remoteloginsuccess` : undefined,
-      }),
+      uri: buildNostrConnectUri(params, { url: window.location.origin }),
     };
   });
   const [step, setStep] = useState<Step>(initialStep);
@@ -114,18 +108,16 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
   const [nostrConnectParams, setNostrConnectParams] = useState<NostrConnectParams | null>(initialConnectSession.params);
   const [nostrConnectUri, setNostrConnectUri] = useState(initialConnectSession.uri);
   const [connectError, setConnectError] = useState<string | null>(null);
-  // Progress status for the nostrconnect handshake. `null` means the user
-  // hasn't kicked off the handshake yet (or they canceled) — we show the QR
-  // / "Open signer app" button. Once the handshake advances we swap in a
-  // spinner with a live status line so the user knows something is working.
+  // Progress status for the nostrconnect handshake. `null` means the handshake
+  // hasn't reported a phase yet — the connection link and QR stay actionable.
   const [connectStatus, setConnectStatus] = useState<NostrConnectStatus | null>(null);
-  // Tracks whether the user has explicitly initiated the handshake from the
-  // mobile UI. The listen subscription itself starts the moment params are
-  // generated — without this flag we'd flip into the progress view as soon
-  // as the user enters the Remote Signer step, before they've done anything.
-  // Desktop doesn't need this: it stays on the QR until the handshake
-  // advances past `awaiting-connect`.
+  // Tracks whether the user has opened the connection in a signer app. The
+  // listen subscription itself starts the moment params are generated —
+  // without this flag we'd show "waiting" as soon as the user reaches the
+  // Remote Signer step, before they've done anything.
   const [hasOpenedSigner, setHasOpenedSigner] = useState(false);
+  const [showQrCode, setShowQrCode] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [showBunkerInput, setShowBunkerInput] = useState(false);
   const [bunkerUri, setBunkerUri] = useState('');
 
@@ -149,7 +141,6 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
   const avatarFileInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const isMobile = useIsMobile();
 
   const hasExtension = typeof window !== 'undefined' && 'nostr' in window;
 
@@ -175,6 +166,8 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
       setConnectError(null);
       setConnectStatus(null);
       setHasOpenedSigner(false);
+      setShowQrCode(false);
+      setCopied(false);
       setShowBunkerInput(false);
       setBunkerUri('');
       /* eslint-enable react-hooks/set-state-in-effect */
@@ -187,9 +180,7 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
   const generateConnectSession = useCallback(() => {
     const relayUrls = login.getRelayUrls();
     const params = generateNostrConnectParams(relayUrls);
-    const uri = generateNostrConnectURI(params, {
-      callback: isMobileDevice() ? `${window.location.origin}/remoteloginsuccess` : undefined,
-    });
+    const uri = buildNostrConnectUri(params, { url: window.location.origin });
     setNostrConnectParams(params);
     setNostrConnectUri(uri);
     setConnectError(null);
@@ -252,18 +243,37 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
     setConnectError(null);
     setConnectStatus(null);
     setHasOpenedSigner(false);
+    setCopied(false);
     setTimeout(() => generateConnectSession(), 0);
   }, [generateConnectSession]);
 
+  // Flip the status line on as soon as the user hands the connection to a
+  // signer app, so that when they come back the dialog already reads
+  // "Waiting for signer connection…" rather than looking like nothing
+  // happened. The link itself does the navigation — the OS routes
+  // nostrconnect:// to whichever signer claims the scheme.
   const handleOpenSignerApp = () => {
-    if (!nostrConnectUri) return;
-    // Flip into the progress view *synchronously* before navigating so that
-    // when the user returns from the signer app, the dialog is already
-    // showing "Waiting for signer connection…" — not the original button
-    // they're worried they need to re-tap.
     setHasOpenedSigner(true);
-    window.location.href = nostrConnectUri;
   };
+
+  const handleCopyLink = useCallback(async () => {
+    if (!nostrConnectUri) return;
+    try {
+      await navigator.clipboard.writeText(nostrConnectUri);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+      // Clipboard access needs a secure context; the QR panel shows the same
+      // link as selectable text for exactly this case.
+      setShowQrCode(true);
+      toast({
+        title: 'Copy failed',
+        description: 'The connection link is shown under the QR code — copy it from there.',
+        variant: 'destructive',
+      });
+    }
+  }, [nostrConnectUri]);
 
   const handleBunkerLogin = async () => {
     if (!bunkerUri.trim() || !validateBunkerUri(bunkerUri)) return;
@@ -451,17 +461,6 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
     }
   };
 
-  // Decide whether to render the progress view in place of the QR/button.
-  // Mobile: flip in as soon as the user taps "Open signer app" (tracked by
-  // `hasOpenedSigner`) so they see feedback the moment they return from the
-  // signer. Desktop: keep the QR visible through the `awaiting-connect`
-  // phase (it's still actionable — they might scan with another device) and
-  // only swap in once the signer has acknowledged and we're fetching the
-  // pubkey.
-  const showProgressView = connectStatus !== null && (
-    connectStatus === 'getting-public-key' ||
-    (isMobile && hasOpenedSigner)
-  );
   const showBackToWelcome = initialStep === 'welcome';
 
   return (
@@ -765,7 +764,8 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
             </div>
           )}
 
-          {/* Connect step — nostrconnect QR + bunker URI fallback. */}
+          {/* Connect step — hand the connection straight to a signer app, with
+              QR and bunker URI fallbacks. */}
           {step === 'connect' && (
             <div className="space-y-4">
               <div className="flex flex-col items-center space-y-4">
@@ -776,39 +776,76 @@ const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose, initialStep = 
                       Try again
                     </Button>
                   </div>
-                ) : showProgressView ? (
-                  // Progress view — replaces the QR/button once the handshake
-                  // is under way. Gives the user live feedback through each
-                  // phase so a stuck signer is visibly stuck, not silently
-                  // stuck.
-                  <div className="flex flex-col items-center space-y-4 py-6 w-full">
-                    <Loader2 className="h-8 w-8 animate-spin text-yellow-300" />
-                    <p className="pacman-muted min-h-[1.25rem] text-center text-sm">
-                      {connectStatusLabel(connectStatus)}
-                    </p>
-                    <button
-                      type="button"
-                      onClick={handleConnectRetry}
-                      className="text-sm font-black uppercase text-cyan-200 hover:text-yellow-300"
-                    >
-                      Cancel
-                    </button>
-                  </div>
                 ) : nostrConnectUri ? (
-                  <>
-                    {!isMobile && (
-                      <div className="p-4 bg-white rounded-xl">
-                        <QRCodeCanvas value={nostrConnectUri} size={180} level="M" />
+                  <div className="w-full space-y-3">
+                    <p className="pacman-muted text-center text-sm">
+                      Approve the connection in your signer app — Opal on desktop, Amber on
+                      mobile. No scanning or pasting needed.
+                    </p>
+
+                    {/* Plain link, not a programmatic redirect: the OS hands the
+                        nostrconnect:// scheme to whichever signer claims it. */}
+                    <Button asChild className="pacman-btn pacman-btn-cyan h-12 w-full">
+                      <a
+                        href={nostrConnectUri}
+                        rel="noopener noreferrer"
+                        onClick={handleOpenSignerApp}
+                      >
+                        <ExternalLink className="w-5 h-5 mr-2" />
+                        Open signer app
+                      </a>
+                    </Button>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={handleCopyLink}
+                        className="pacman-btn pacman-btn-yellow"
+                      >
+                        {copied ? (
+                          <Check className="w-4 h-4 mr-2" />
+                        ) : (
+                          <Copy className="w-4 h-4 mr-2" />
+                        )}
+                        {copied ? 'Copied' : 'Copy link'}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowQrCode((visible) => !visible)}
+                        className="pacman-btn pacman-btn-yellow"
+                      >
+                        <QrCode className="w-4 h-4 mr-2" />
+                        {showQrCode ? 'Hide QR' : 'Show QR'}
+                      </Button>
+                    </div>
+
+                    {hasOpenedSigner && (
+                      <div className="space-y-2">
+                        <p className="pacman-muted flex items-center justify-center gap-2 text-center text-sm">
+                          <Loader2 className="h-4 w-4 animate-spin text-yellow-300" />
+                          {connectStatusLabel(connectStatus) || 'Waiting for signer connection…'}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={handleConnectRetry}
+                          className="w-full text-sm font-black uppercase text-cyan-200 hover:text-yellow-300"
+                        >
+                          Start over
+                        </button>
                       </div>
                     )}
 
-                    {isMobile && (
-                      <Button onClick={handleOpenSignerApp} className="pacman-btn pacman-btn-cyan h-12 w-full">
-                        <ExternalLink className="w-5 h-5 mr-2" />
-                        Open signer app
-                      </Button>
+                    {showQrCode && (
+                      <div className="space-y-2">
+                        <div className="flex justify-center rounded-xl bg-white p-4">
+                          <QRCodeCanvas value={nostrConnectUri} size={180} level="M" />
+                        </div>
+                        <p className="pacman-muted max-h-16 overflow-y-auto break-all rounded border-2 border-cyan-300/40 p-2 font-mono text-[0.65rem] leading-tight">
+                          {nostrConnectUri}
+                        </p>
+                      </div>
                     )}
-                  </>
+                  </div>
                 ) : (
                   <div className="flex items-center justify-center h-[100px]">
                     <Loader2 className="h-8 w-8 animate-spin text-yellow-300" />
