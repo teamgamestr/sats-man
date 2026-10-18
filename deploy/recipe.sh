@@ -25,9 +25,11 @@ FREE_MODE="${SATSMAN_FREE_MODE:-false}"
 TEST_MODE="${SATSMAN_TEST_MODE:-false}"
 log() { printf '[%s] %s\n' "$APP" "$*"; }
 
-if [ -n "$(git status --porcelain)" ]; then
-  log "refusing to deploy: the checkout has modifications"
-  git status --short
+# Tracked files only: an untracked build artefact or helper script sits happily
+# there and does not stop git taking the tip, so it is not a reason to refuse.
+if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
+  log "refusing to deploy: the checkout has modified tracked files"
+  git status --porcelain --untracked-files=no
   exit 1
 fi
 
@@ -62,5 +64,21 @@ if ! systemctl is-active --quiet "$SERVICE"; then
   sudo systemctl status "$SERVICE" --no-pager | tail -20 || true
   exit 1
 fi
+
+# The unit reports active before it binds its port, and the watcher checks the
+# public URL as soon as this exits: wait for the app to answer locally first,
+# otherwise a healthy deploy is recorded as a 502 failure.
+code=""
+for _ in $(seq 1 30); do
+  code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 "http://127.0.0.1:3002/" 2>/dev/null)
+  case "$code" in 2*) break ;; esac
+  sleep 1
+done
+if [ "${code#2}" = "$code" ]; then
+  log "$SERVICE is active but has not answered on 127.0.0.1:3002 after 30s (last HTTP ${code:-none})"
+  sudo journalctl -u "$SERVICE" -n 20 --no-pager 2>/dev/null | tail -10 || true
+  exit 1
+fi
+log "answering on 127.0.0.1:3002 (HTTP $code)"
 
 log "deployed $(git rev-parse --short HEAD)"
