@@ -34,7 +34,7 @@
     "react-dom": "^19.2.5",
     "react-hook-form": "^7.74.0",
     "react-resizable-panels": "^4.10.0",
-    "react-router-dom": "^7.14.2",
+    "react-router-dom": "^7.18.4",
     "recharts": "^3.8.1",
     "tailwind-merge": "^3.5.0",
     "tw-animate-css": "^1.2.0",
@@ -62,7 +62,11 @@
     "tailwindcss": "^4.2.4",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.0",
-    "vite": "^8.0.10",
+    "vite": "^8.0.16",
     "vitest": "^4.1.5"
+  },
+  "overrides": {
+    "browserslist": "^4.28.7",
+    "postcss": "^8.5.18"
   }
 }
