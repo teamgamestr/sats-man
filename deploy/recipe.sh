@@ -70,7 +70,10 @@ fi
 # otherwise a healthy deploy is recorded as a 502 failure.
 code=""
 for _ in $(seq 1 30); do
-  code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 "http://127.0.0.1:3002/" 2>/dev/null)
+  # `|| true`: under `set -e` a curl that cannot connect yet would abort the whole
+  # recipe (exit 7) instead of being retried, and a port that is not up yet is the
+  # normal case right after a restart.
+  code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 "http://127.0.0.1:3002/" 2>/dev/null || true)
   case "$code" in 2*) break ;; esac
   sleep 1
 done
