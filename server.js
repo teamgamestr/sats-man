@@ -40,6 +40,8 @@ app.post('/api/sign-score', (req, res) => {
       ['d', sessionId],
       ['p', playerPubkey],
       ['game', 'sats-man'],
+      ['i', 'https://sats-man.com'],
+      ['k', 'web'],
       ['score', String(score)],
       ['state', 'final'],
       ['difficulty', `level-${level}`],

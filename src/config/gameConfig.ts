@@ -1,6 +1,7 @@
 export interface GameConfig {
   gameId: string;
   gameName: string;
+  gameUrl: string;
   gameVersion: string;
   receiverPubkey: string;
   fallbackLightningAddress: string;
@@ -15,6 +16,7 @@ export interface GameConfig {
 export const gameConfig: GameConfig = {
   gameId: 'sats-man',
   gameName: 'Sats-Man',
+  gameUrl: 'https://sats-man.com',
   gameVersion: '0.1.0',
   receiverPubkey: '5a625acc4312b5b56c735e7eb0fa48521ec9a5fe72bef0015b0ca62f3c4e09b6',
   fallbackLightningAddress: 'saltybrow17@walletofsatoshi.com',

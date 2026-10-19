@@ -28,7 +28,10 @@ function getTag(event: NostrEvent, name: string): string | undefined {
 
 function parseScoreEvent(event: NostrEvent): HighScoreEntry | null {
   if (event.kind !== 30762) return null;
-  if (getTag(event, 'game') !== gameConfig.gameId) return null;
+  // The game identity is the short `game` id, or the NIP-73 `i` URL on newer events.
+  const isSatsMan = getTag(event, 'game') === gameConfig.gameId
+    || getTag(event, 'i') === gameConfig.gameUrl;
+  if (!isSatsMan) return null;
   if (getTag(event, 'state') !== 'final') return null;
 
   const score = Number(getTag(event, 'score'));
@@ -112,6 +115,7 @@ export function useHighScores() {
       const events = await nostr.group(SCORE_RELAYS).query(
         [
           { kinds: [30762], authors: [gameConfig.receiverPubkey], limit: 500 },
+          { kinds: [30762], "#i": [gameConfig.gameUrl], limit: 500 },
           { kinds: [30762], limit: 500 },
         ],
         { signal: AbortSignal.any([signal, AbortSignal.timeout(6000)]) },
