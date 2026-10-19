@@ -54,7 +54,9 @@ This app is Sats-Man: a Gamestr/Nostr/Lightning wrapper around `bward2/pacman-js
 - Scores use kind `30762` with `game=sats-man`, `score`, `state=final`, `difficulty=level-N`, `duration`, `version`, `genre`, and NIP-31 `alt` tags.
 - Production signing uses `/api/sign-score` and `SATSMAN_NSEC` from env. `server.js` serves this route after build.
 - Vite dev also serves `/api/sign-score` via middleware in `vite.config.ts`, so `npm run dev` can sign scores locally.
-- Local `.env` should contain `SATSMAN_NSEC=...`; `.env` is gitignored and must never be committed.
+- Local `.env` should contain `SATSMAN_NSEC=...`; `.env` is gitignored and must never be committed. Keep it mode `600`.
+- Production does not read the key from `.env`: `sats-man.service` loads `EnvironmentFile=/etc/gamestr/sats-man.env` (root-owned, mode `600`). Unit files in `/etc/systemd/system` are world-readable, so never put a secret back into the unit. `deploy/sats-man.service` is the tracked reference copy of the unit.
+- `SATSMAN_NSEC` is currently the **same key** as `gameConfig.receiverPubkey` (the zap receiver), so it is a money identity, not a throwaway signer. Rotating or splitting it changes the zap destination, which is a deliberate decision, not a routine deploy step.
 - `gameConfig.testMode` currently allows client-signed test score events to be published directly with `['mode', 'test']`. When `testMode` is true, score events MUST publish only to `gameConfig.testModeRelays` (`wss://test.gamestr.io`) and no normal app relays. This applies to both dev/client mode and server-signing mode: API responses can include a `relays` array, and the client must publish returned server-signed events to those relays only. `server.js` also supports `SATSMAN_TEST_MODE=false` to omit test relays in production server mode. When `testMode` is false, use server signing.
 - Sharing a score as a kind-1 note must work even if server score signing fails. Include the Gamestr score URL only when a signed score event exists.
 

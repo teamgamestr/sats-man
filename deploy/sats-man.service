@@ -1,0 +1,20 @@
+[Unit]
+Description=Sats-Man - Pac-Man with Bitcoin
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/gamestr/sats-man
+ExecStart=/usr/bin/node server.js
+Restart=always
+RestartSec=5
+# Signing key lives in a root-only file, not in this unit (units are world-readable).
+EnvironmentFile=/etc/gamestr/sats-man.env
+Environment="PORT=3002"
+Environment="SATSMAN_TEST_MODE=false"
+Environment="NODE_ENV=production"
+
+[Install]
+WantedBy=multi-user.target
