@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "npm i --silent && vite",
     "start": "node server.js",
-    "build": "vite build -l error && cp dist/index.html dist/404.html && echo 'Project built successfully!'",
+    "build": "sh scripts/build-atomic.sh",
     "test": "npm ci --silent && tsc --noEmit && eslint --cache && vitest run --reporter=dot --silent && vite build -l error && cp dist/index.html dist/404.html && echo 'All tests passed!'"
   },
   "dependencies": {
